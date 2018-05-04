@@ -59,14 +59,11 @@ $.lazyTroll = {
         if (youBlock === 'true') return true;
         if ($.lazyTroll.alreadyBlocked.includes(user_id)) return true;
 
-        if(username !== $(node).attr('data-screen-name')) {
-            console.log('oh shit');
+        // one last check to make sure we're not accidentally
+        // triggering a block on the wrong tweet
+        if((username !== $(node).attr('data-screen-name')) ||
+            (user_id !== $(node).attr('data-user-id'))) {
             return true;
-        }
-        if(user_id !== $(node).attr('data-user-id')) {
-            console.log('oh shit');
-            return true;
-
         }
 
         console.log('blockUser ' + username + ': ' + reason);
