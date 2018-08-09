@@ -11,6 +11,7 @@ $.lazyTroll = {
         'not a russian bot',
         'followed by ',
         '#LiberalismIsAMentalDisorder',
+        'Constitutional Originalist',
 
         '#QAnon',
         '#FollowTheWhiteRabbit',
@@ -26,6 +27,7 @@ $.lazyTroll = {
         '#DemExit',
         '#McCarthyism',
         '#Tulsi2020',
+        '#WalkAway',
     ],
 
     checkUser: function(node) {
@@ -43,7 +45,7 @@ $.lazyTroll = {
         }
 
         let profileImage = $(node).find('img.avatar').attr('src');
-        if (profileImage.indexOf('default_profile_images') !== -1) {
+        if (profileImage === 'https://abs.twimg.com/sticky/default_profile_images/default_profile_bigger.png') {
             $.lazyTroll.blockUser(node, user_id, username, 'default-profile-image');
             return true;
         }
@@ -121,10 +123,13 @@ $.lazyTroll = {
         $.lazyTroll.loadConfig();
 
         function processTweets(mutations) {
-            $('div.tweet')
-                .each(function (i, node) {
-                    $.lazyTroll.checkUser(node);
-                });
+            mutations.forEach(function(mutation) {
+                $(mutation)
+                    .find('div.tweet')
+                    .each(function(i, node) {
+                        $.lazyTroll.checkUser(node);
+                    });
+            });
         }
 
         processTweets();
