@@ -49,14 +49,13 @@ $.lazyTroll = {
     ],
 
     checkUser: function(node) {
-        node = $(node);
-        let user_id = node.attr('data-user-id');
+        let user_id = $(node).attr('data-user-id');
         if (!user_id) return true;
         if ($.lazyTroll.alreadyChecked.includes(user_id)) return true;
-        if (node.attr('data-you-follow') === 'true') return true;
-        if (node.attr('data-you-block') === 'true') return true;
+        if ($(node).attr('data-you-follow') === 'true') return true;
+        if ($(node).attr('data-you-block') === 'true') return true;
 
-        let username = node.attr('data-screen-name');
+        let username = $(node).attr('data-screen-name');
 
         // console.log('$.lazyTroll: applyThermotakensity' + " : " + username + " (" + user_id + ")");
 
@@ -64,7 +63,7 @@ $.lazyTroll = {
             return $.lazyTroll.blockUser(node, user_id, username, 'username-is-numeric');
         }
 
-        let profileImage = node.find('img.avatar').attr('src');
+        let profileImage = $(node).find('img.avatar').attr('src');
         if (profileImage.indexOf('default_profile_images') !== -1) {
             return $.lazyTroll.blockUser(node, user_id, username, 'default-profile-image');
         }
@@ -74,26 +73,26 @@ $.lazyTroll = {
 
     blockUser: function(node, user_id, username, reason) {
         // Make sure this isn't someone who got block for something else
-        let youBlock = node.attr('data-you-block');
+        let youBlock = $(node).attr('data-you-block');
         if (youBlock === 'true') return true;
 
         if ($.lazyTroll.alreadyBlocked.includes(user_id)) return true;
 
         // one last check to make sure we're not accidentally
         // triggering a block on the wrong tweet
-        if((username !== node.attr('data-screen-name')) ||
-            (user_id !== node.attr('data-user-id'))) {
+        if((username !== $(node).attr('data-screen-name')) ||
+            (user_id !== $(node).attr('data-user-id'))) {
             return true;
         }
 
         console.log('blockUser ' + username + ': ' + reason);
 
-        let blockButton = node
+        let blockButton = $(node)
             .find('li.block-link')
             .find('button.dropdown-link');
 
         if (!blockButton) {
-            blockButton = node
+            blockButton = $(node)
                 .find("li.not-blocked");
         }
         blockButton.click();
@@ -144,10 +143,10 @@ $.lazyTroll = {
 
     loadConfig: function() {
         console.log('$.lazyTroll: loadConfig');
-        $.each($.lazyTroll.profileKeywordKillList, function( index, value ) {
+        $.each($.lazyTroll.profileKeywordKillList, function(index, value) {
             $.lazyTroll.profileKeywordKillList[index] = $.trim(value.toLowerCase());
         });
-        $.each($.lazyTroll.userNameKillList, function( index, value ) {
+        $.each($.lazyTroll.userNameKillList, function(index, value) {
             $.lazyTroll.userNameKillList[index] = $.trim(value.toLowerCase());
         });
     },
@@ -156,7 +155,7 @@ $.lazyTroll = {
         // console.log('$.lazyTroll: processMutations');
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-                node
+                $(node)
                     .find('div.tweet')
                     .each(function (i, tweet) {
                         $.lazyTroll.checkUser(tweet);
