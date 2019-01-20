@@ -21,6 +21,8 @@ $.lazyTroll = {
         '#IProtectOurCommunity',
         '#ConcealCarryPermit',
         '#NRA Member',
+        'trump supporter',
+        'lifetime NRA',
 
         'Shadow banned',
         'Shadowbanned',
