@@ -12,6 +12,18 @@ $.lazyTroll = {
         'followed by ',
         '#LiberalismIsAMentalDisorder',
         'Constitutional Originalist',
+        'Constitutional conservative',
+        'proud conservative',
+        '#TrumpTrain',
+        '#DrainTheSwamp',
+        '#SecureOurBorders',
+        '#ProtectOurCitizens',
+        '#IProtectOurCommunity',
+        '#ConcealCarryPermit',
+        '#NRA Member',
+
+        'Shadow banned',
+        'Shadowbanned',
 
         '#QAnon',
         '#FollowTheWhiteRabbit',
@@ -23,6 +35,7 @@ $.lazyTroll = {
         'Pro-Free Speech',
         'gab.ai',
         '#RedPill',
+        'ΜΟΛΩΝ ΛΑΒΕ',
 
         '#DemExit',
         '#McCarthyism',
@@ -30,52 +43,57 @@ $.lazyTroll = {
         '#WalkAway',
     ],
 
-    checkUser: function(node) {
-        let username = $(node).attr('data-screen-name');
-        let user_id = $(node).attr('data-user-id');
+    userNameKillList: [
+        'Deplorable',
+        '❌'
+    ],
 
+    checkUser: function(node) {
+        node = $(node);
+        let user_id = node.attr('data-user-id');
         if (!user_id) return true;
         if ($.lazyTroll.alreadyChecked.includes(user_id)) return true;
-        if ($(node).attr('data-you-follow') === 'true') return true;
-        if ($(node).attr('data-you-block') === 'true') return true;
+        if (node.attr('data-you-follow') === 'true') return true;
+        if (node.attr('data-you-block') === 'true') return true;
+
+        let username = node.attr('data-screen-name');
+
+        // console.log('$.lazyTroll: applyThermotakensity' + " : " + username + " (" + user_id + ")");
 
         if ($.isNumeric(username.slice(-8))) {
-            $.lazyTroll.blockUser(node, user_id, username, 'username-is-numeric');
-            return true;
+            return $.lazyTroll.blockUser(node, user_id, username, 'username-is-numeric');
         }
 
-        let profileImage = $(node).find('img.avatar').attr('src');
-        if (profileImage === 'https://abs.twimg.com/sticky/default_profile_images/default_profile_bigger.png') {
-            $.lazyTroll.blockUser(node, user_id, username, 'default-profile-image');
-            return true;
+        let profileImage = node.find('img.avatar').attr('src');
+        if (profileImage.indexOf('default_profile_images') !== -1) {
+            return $.lazyTroll.blockUser(node, user_id, username, 'default-profile-image');
         }
 
-        $.lazyTroll.checkProfile(node, user_id, username);
-
-        return true;
+        return $.lazyTroll.checkProfile(node, user_id, username);
     },
 
     blockUser: function(node, user_id, username, reason) {
         // Make sure this isn't someone who got block for something else
-        let youBlock = $(node).attr('data-you-block');
+        let youBlock = node.attr('data-you-block');
         if (youBlock === 'true') return true;
+
         if ($.lazyTroll.alreadyBlocked.includes(user_id)) return true;
 
         // one last check to make sure we're not accidentally
         // triggering a block on the wrong tweet
-        if((username !== $(node).attr('data-screen-name')) ||
-            (user_id !== $(node).attr('data-user-id'))) {
+        if((username !== node.attr('data-screen-name')) ||
+            (user_id !== node.attr('data-user-id'))) {
             return true;
         }
 
         console.log('blockUser ' + username + ': ' + reason);
 
-        let blockButton = $(node)
+        let blockButton = node
             .find('li.block-link')
             .find('button.dropdown-link');
 
         if (!blockButton) {
-            blockButton = $(node)
+            blockButton = node
                 .find("li.not-blocked");
         }
         blockButton.click();
@@ -87,60 +105,94 @@ $.lazyTroll = {
             .click();
         $.lazyTroll.alreadyBlocked.push(user_id);
 
+        return false;
     },
 
     checkProfile: function(node, user_id, username) {
         // get the profile and then check it when the response comes back
         let url = 'https://twitter.com/i/profiles/popup?user_id=' + user_id;
         let allClear = true;
+        // console.log('$.lazyTroll: checkProfile' + " : " + username + " (" + user_id + ")");
 
         $.getJSON(url, function (data) {
-
-            let profileText = $(data['html']).find('p.bio').text().toLowerCase();
+            let profileText = $(data['html']).find('p.bio').text().toLowerCase().trim();
 
             if (profileText) {
-                profileText = profileText.toLowerCase();
-                $.lazyTroll.profileKeywordKillList.forEach(function (killText) {
+                if (profileText === '""') {
+                }
+                else $.lazyTroll.profileKeywordKillList.forEach(function (killText) {
                     if (profileText.indexOf(killText) !== -1) {
-                        $.lazyTroll.blockUser(node, user_id, username, 'profileText ' + killText);
+                        $.lazyTroll.blockUser(node, user_id, username, 'profileText "' + killText + '"');
                         allClear = false;
-                        return false;
                     }
-                })
+                });
             }
+            // else {
+            //     $.lazyTroll.blockUser(node, user_id, username, 'profileText is null');
+            //     allClear = false;
+            // }
         });
 
-        if (allClear) $.lazyTroll.alreadyChecked.push(user_id);
+        if (allClear) {
+            $.lazyTroll.alreadyChecked.push(user_id);
+            return true;
+        }
+        else {
+            return false;
+        }
     },
 
     loadConfig: function() {
+        console.log('$.lazyTroll: loadConfig');
         $.each($.lazyTroll.profileKeywordKillList, function( index, value ) {
             $.lazyTroll.profileKeywordKillList[index] = $.trim(value.toLowerCase());
+        });
+        $.each($.lazyTroll.userNameKillList, function( index, value ) {
+            $.lazyTroll.userNameKillList[index] = $.trim(value.toLowerCase());
+        });
+    },
+
+    processMutations: function(mutations) {
+        // console.log('$.lazyTroll: processMutations');
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                node
+                    .find('div.tweet')
+                    .each(function (i, tweet) {
+                        $.lazyTroll.checkUser(tweet);
+                    });
+            });
         });
     },
 
     start: function() {
+        console.log('$.lazyTroll: start');
         $.lazyTroll.loadConfig();
 
-        function processTweets(mutations) {
-            mutations.forEach(function(mutation) {
-                $(mutation)
-                    .find('div.tweet')
-                    .each(function(i, node) {
-                        $.lazyTroll.checkUser(node);
-                    });
+        $(document)
+            .find('div.tweet')
+            .each(function(i, node) {
+                $.lazyTroll.checkUser(node);
             });
-        }
 
-        processTweets();
-        new MutationObserver(processTweets)
+        $.lazyTroll.observer = new MutationObserver($.lazyTroll.processMutations)
             .observe(document.body, {
                 subtree: true,
                 childList: true,
             });
+    },
+
+    cleanup: function() {
+        $.lazyTroll.observer.disconnect()
     }
+
 };
+
 
 $(document).ready(function () {
     $.lazyTroll.start();
+});
+
+$('body').bind('beforeunload',function(){
+    $.lazyTroll.cleanup();
 });
