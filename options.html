@@ -3,36 +3,38 @@
 <head><title>Lazy Troll</title></head>
 <body>
 
-Block accounts with
-<div><label>
-  <input type="checkbox" id="blockDefaultProfileImage">
-    default profile image
-</label></div>
-<div><label>
-  <input type="checkbox" id="blockScreenNameIsNumeric">
-    screen name ending with 8 digits
-</label></div>
-<div><label>
-  <input type="checkbox" id="blockProfileTextIsNull">
-    blank profile text
-</label></div>
+<h1>Block accounts with</h1>
+    <div><label>
+      <input type="checkbox" id="blockDefaultProfileImage">
+        default profile image
+    </label></div>
+    <div><label>
+      <input type="checkbox" id="blockScreenNameIsNumeric">
+        screen name ending with 8 digits
+    </label></div>
+    <div><label>
+      <input type="checkbox" id="blockProfileTextIsNull">
+        blank profile text
+    </label></div>
 
-or keywords in
-<div><label>
-    profile
-  <input style="overflow:auto;" type="text" id="profileKeywordKillList">
-</label></div>
+    <div>
+        keywords in profile
+    </div>
+    <textarea style="overflow:auto;" rows="10" cols="40" id="profileKeywordKillList">
 
-<div><label>
-    user name
-  <input style="overflow:auto;" type="text" id="userNameCharacterKillList">
-</label></div>
+    </textarea>
 
-<div id="status"></div>
-<button id="save">Save</button>
+    <div>
+        keywords in user name
+    </div>
+    <textarea style="overflow:auto;" rows="10" cols="40" id="userNameCharacterKillList">
 
+    </textarea>
 
-<script src="jquery-3.3.1.min.js"></script>
-<script src="options.js"></script>
+    <div id="status"></div>
+    <button id="save">Save</button>
+
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="options.js"></script>
 </body>
 </html>
