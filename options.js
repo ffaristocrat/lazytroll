@@ -8,13 +8,6 @@ lazyTrollOptions = {
             userNameCharacterKillList: $('#userNameCharacterKillList').val(),
         }, function () {
             console.log('lazyTrollOptions: saveOptions call back');
-
-            // Update status to let user know options were saved.
-            let status = $('#status');
-            status.innerText = 'Options saved.';
-            setTimeout(function () {
-                status.innerText = '';
-            }, 750);
         });
     },
 
@@ -41,5 +34,9 @@ $(document).ready(function () {
     lazyTrollOptions.loadOptions();
     $('button#save').click(function() {
         lazyTrollOptions.saveOptions();
+        window.close()
+    });
+    $('button.cancel').click(function() {
+        window.close()
     });
 });
