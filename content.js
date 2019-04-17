@@ -102,6 +102,17 @@ lazyTroll = {
             return;
         }
 
+        // User name has prohibited keywords/characters
+        let userName = $(node).find('strong.fullname').text().toLowerCase().trim();
+        let badUserName = false;
+        lazyTroll.userNameKeywordKillList.forEach(function (keyword) {
+            if (userName.indexOf(keyword) !== -1) {
+                lazyTroll.blockUser(node, userId, screenName, 'userName "' + keyword + '"');
+                badUserName = true;
+            }
+        });
+        if (badUserName) return;
+
         // Profiles that pass the profile checks
         // won't be checked again
         if (lazyTroll.checkProfile(node, userId, screenName)) {
