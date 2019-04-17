@@ -1,6 +1,5 @@
 lazyTrollOptions = {
     saveOptions: function () {
-        console.log('lazyTrollOptions: saveOptions');
         chrome.storage.local.set({
             blockDefaultProfileImage: $('#blockDefaultProfileImage').is(':checked'),
             blockScreenNameIsNumeric: $('#blockScreenNameIsNumeric').is(':checked'),
@@ -20,7 +19,6 @@ lazyTrollOptions = {
     },
 
     loadOptions: function() {
-        console.log('lazyTrollOptions: loadOptions');
         chrome.storage.local.get({
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
