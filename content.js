@@ -163,7 +163,6 @@ lazyTroll = {
     },
 
     loadConfig: function() {
-        console.log('lazyTroll: loadConfig');
         chrome.storage.local.get({
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
@@ -194,32 +193,26 @@ lazyTroll = {
     },
 
     processMutations: function(mutations) {
-        // console.log('lazyTroll: processMutations');
-        $(document)
-            .find('div.tweet')
-            .each(function(i, node) {
-                lazyTroll.checkUser(node);
-            });
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-                $(node)
-                    .find('div.tweet')
-                    .each(function (i, tweet) {
-                        lazyTroll.checkUser(tweet);
-                    });
+                lazyTroll.checkForTweets(node);
             });
         });
+    },
+
+    checkForTweets: function(node) {
+        $(node)
+            .find('div.tweet')
+            .each(function (i, tweet) {
+                lazyTroll.checkUser(tweet);
+            });
     },
 
     start: function() {
         console.log('lazyTroll: start');
         lazyTroll.loadConfig();
 
-        $(document)
-            .find('div.tweet')
-            .each(function(i, node) {
-                lazyTroll.checkUser(node);
-            });
+        lazyTroll.checkForTweets(document);
 
         lazyTroll.observer = new MutationObserver(lazyTroll.processMutations)
             .observe(document.body, {
