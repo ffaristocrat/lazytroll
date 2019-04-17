@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Lazy Troll</title></head>
+<body>
+
+Block accounts with
+<div><label>
+  <input type="checkbox" id="blockDefaultProfileImage">
+    default profile image
+</label></div>
+<div><label>
+  <input type="checkbox" id="blockScreenNameIsNumeric">
+    screen name ending with 8 digits
+</label></div>
+<div><label>
+  <input type="checkbox" id="blockProfileTextIsNull">
+    blank profile text
+</label></div>
+
+or keywords in
+<div><label>
+    profile
+  <input style="overflow:auto;" type="text" id="profileKeywordKillList">
+</label></div>
+
+<div><label>
+    user name
+  <input style="overflow:auto;" type="text" id="userNameCharacterKillList">
+</label></div>
+
+<div id="status"></div>
+<button id="save">Save</button>
+
+
+<script src="js/lib/jquery-3.3.1.min.js"></script>
+<script src="js/options.js"></script>
+</body>
+</html>

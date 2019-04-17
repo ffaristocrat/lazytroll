@@ -1,19 +1,56 @@
 {
   "name": "Lazy Troll Blocker",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Automatically block Twitter accounts from lazy trolls",
   "manifest_version": 2,
 
-  "content_scripts": [{
-    "js": [
-      "jquery-3.3.1.min.js",
-      "content.js"
-    ],
-    "matches": ["https://*.twitter.com/*"],
-    "run_at": "document_end",
-    "all_frames": true
-  }],
+  "content_scripts": [
+    {
+      "js": [
+        "js/lib/jquery-3.3.1.min.js",
+        "js/content.js"
+      ],
+      "matches": ["https://*.twitter.com/*"],
+      "run_at": "document_end",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://twitter.com/aexia/*"
+      ],
+      "js": [
+        "js/session.js"
+      ]
+    }
+  ],
   "permissions": [
-    "https://*.twitter.com/*"
-  ]
+      "storage",
+      "https://*.twitter.com/*"
+  ],
+  "browser_action": {
+    "default_title": "Lazy Troll Twitter Oauth",
+    "default_icon": "icon128.png",
+    "default_popup": "options.html"
+  },
+  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "background": {
+    "scripts": [
+      "js/lib/jquery-3.3.1.min.js",
+      "js/lib/oAuth.js",
+      "js/lib/sha1.js",
+      "js/lib/twitter.js",
+      "js/background.js"
+    ],
+    "persistent": false
+  },
+    "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_security_policy": "script-src 'self'; object-src 'self'"
 }
