@@ -45,5 +45,3 @@ $(document).ready(function () {
         lazyTrollOptions.saveOptions();
     });
 });
-
-
