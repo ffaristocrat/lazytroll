@@ -155,13 +155,13 @@ lazyTroll = {
             profileKeywordKillList.forEach(function(value) {
                 let keyword = $.trim(value.toLowerCase());
                 if (keyword !== "") {
-                    lazyTroll.profileKeywordKillList.appendItem();
+                    lazyTroll.profileKeywordKillList.push(keyword);
                 }
             });
             userNameKeywordKillList.forEach(function(value) {
                 let keyword = $.trim(value.toLowerCase());
                 if (keyword !== "") {
-                    lazyTroll.userNameKeywordKillList.appendItem();
+                    lazyTroll.userNameKeywordKillList.push(keyword);
                 }
             });
 
