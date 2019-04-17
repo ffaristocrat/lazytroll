@@ -21,30 +21,34 @@ lazyTroll = {
         }
 
         // Push a callback function onto the block queue
-        lazyTroll.blockQueue.push(function () {
-            console.log('lazyTroll: blockUser ' + screenName + ': ' + reason);
+        lazyTroll.blockQueue.push(
+            lazyTroll.clickBlockUserButton(node, userId, screenName, reason)
+        );
+    },
 
-            // Find the block button on the tweet and click it
-            let blockButton = $(node)
-                .find('li.block-link')
-                .find('button.dropdown-link');
+    clickBlockUserButton: function(node, userId, screenName, reason) {
+        console.log('lazyTroll: blockUser ' + screenName + ' (' + userId + '): ' + reason);
 
-            if (!blockButton) {
-                blockButton = $(node)
-                    .find("li.not-blocked");
-            }
-            blockButton.click();
+        // Find the block button on the tweet and click it
+        let blockButton = $(node)
+            .find('li.block-link')
+            .find('button.dropdown-link');
 
-            // Hide the modal popup and confirm the block
-            $("body").removeClass("modal-enabled");
-            $('div#block-dialog.block-dialog')
-                .hide()
-                .find('button.block-button')
-                .click();
+        if (!blockButton) {
+            blockButton = $(node)
+                .find("li.not-blocked");
+        }
+        blockButton.click();
 
-            // Destroy the tweet node in case it didn't get hidden
-            node.remove();
-        });
+        // Hide the modal popup and confirm the block
+        $("body").removeClass("modal-enabled");
+        $('div#block-dialog.block-dialog')
+            .hide()
+            .find('button.block-button')
+            .click();
+
+        // Destroy the tweet node in case it didn't get hidden
+        node.remove();
     },
 
     checkProfile: function(node, userId, screenName) {
