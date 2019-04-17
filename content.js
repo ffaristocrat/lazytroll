@@ -1,64 +1,12 @@
 lazyTroll = {
-    alreadyChecked: [],
-    alreadyBlocked: [],
-    profileKeywordKillListDefaults: [
-        '#MAGA',
-        '#2A',
-        '#Trump2020',
-        '#buildthewall',
-        '#americafirst',
-        'not a russian bot',
-        'followed by',
-        '#LiberalismIsAMentalDisorder',
-        'Constitutional Originalist',
-        'Constitutional conservative',
-        'proud conservative',
-        '#TrumpTrain',
-        '#DrainTheSwamp',
-        '#SecureOurBorders',
-        '#ProtectOurCitizens',
-        '#IProtectOurCommunity',
-        '#ConcealCarryPermit',
-        '#NRA Member',
-        'trump supporter',
-        'lifetime NRA',
-
-        'Shadow banned',
-        'Shadowbanned',
-
-        '#QAnon',
-        '#FollowTheWhiteRabbit',
-        '#QArmy',
-        '#pizzagate',
-        '#pedogate',
-
-        'Proud Boy',
-        'Pro-Free Speech',
-        'Pro Free Speech',
-        'gab.ai',
-        '#RedPill',
-        'ΜΟΛΩΝ ΛΑΒΕ',
-
-        '#DemExit',
-        '#McCarthyism',
-        '#Tulsi2020',
-        '#WalkAway',
-
-        '#Bernie2020',
-        'Sanders 2020 supporter',
-        'Sanders supporter',
-    ],
-
-    userNameKeywordKillListDefaults: [
-        'Deplorable',
-        '❌'
-    ],
-
     profileKeywordKillList: [],
     userNameKeywordKillList: [],
     blockDefaultProfileImage: true,
     blockScreenNameIsNumeric: true,
     blockProfileTextIsNull: false,
+
+    alreadyChecked: [],
+    blockQueue: [],
 
     checkUser: function(node) {
         let userId = $(node).attr('data-user-id');
@@ -80,57 +28,53 @@ lazyTroll = {
             return lazyTroll.blockUser(node, userId, screenName, 'default-profile-image');
         }
 
-        return lazyTroll.checkProfile(node, userId, screenName);
+        if (lazyTroll.checkProfile(node, userId, screenName)){
+            lazyTroll.alreadyChecked.push(userId);
+        }
     },
 
     blockUser: function(node, userId, screenName, reason) {
-        // Make sure this isn't someone who got blocked for something else
-        let youBlock = $(node).attr('data-you-block');
-        if (youBlock === 'true') return true;
 
-        if (lazyTroll.alreadyBlocked.includes(userId)) return true;
+        lazyTroll.blockQueue.push(function () {
+            // Make sure this isn't someone who got blocked for something else
+            let youBlock = $(node).attr('data-you-block');
+            if (youBlock === 'true') return true;
 
-        // one last check to make sure we're not accidentally
-        // triggering a block on the wrong tweet
-        if((screenName !== $(node).attr('data-screen-name')) ||
-            (userId !== $(node).attr('data-user-id'))) {
-            return true;
-        }
+            // one last check to make sure we're not accidentally
+            // triggering a block on the wrong tweet
+            if((screenName !== $(node).attr('data-screen-name')) ||
+                (userId !== $(node).attr('data-user-id'))) {
+                return true;
+            }
 
-        console.log('blockUser ' + screenName + ': ' + reason);
+            console.log('lazyTroll: blockUser ' + screenName + ': ' + reason);
 
-        let blockButton = $(node)
-            .find('li.block-link')
-            .find('button.dropdown-link');
+            let blockButton = $(node)
+                .find('li.block-link')
+                .find('button.dropdown-link');
 
-        if (!blockButton) {
-            blockButton = $(node)
-                .find("li.not-blocked");
-        }
-        blockButton.click();
+            if (!blockButton) {
+                blockButton = $(node)
+                    .find("li.not-blocked");
+            }
+            blockButton.click();
 
-        $("body").removeClass("modal-enabled");
-        $('div#block-dialog.block-dialog')
-            .hide()
-            .find('button.block-button')
-            .click();
+            $("body").removeClass("modal-enabled");
+            $('div#block-dialog.block-dialog')
+                .hide()
+                .find('button.block-button')
+                .click();
 
-        chrome.runtime.sendMessage({
-            type: "lazyTroll.blockUser",
-            session: window.location.search.substr(1),
-            screen_name: screenName,
+            return false;
         });
-
-        lazyTroll.alreadyBlocked.push(userId);
-
-        return false;
     },
 
     checkProfile: function(node, userId, screenName) {
+        // Assume they'll pass
+        let allClear = true;
+
         // get the profile and then check it when the response comes back
         let url = 'https://twitter.com/i/profiles/popup?user_id=' + userId;
-        let allClear = true;
-        // console.log('lazyTroll: checkProfile' + " : " + screenName + " (" + userId + ")");
 
         $.getJSON(url, function (data) {
             let profileText = $(data['html']).find('p.bio').text().toLowerCase().trim();
@@ -153,13 +97,7 @@ lazyTroll = {
             }
         });
 
-        if (allClear) {
-            lazyTroll.alreadyChecked.push(userId);
-            return true;
-        }
-        else {
-            return false;
-        }
+        return allClear;
     },
 
     loadConfig: function() {
@@ -208,6 +146,14 @@ lazyTroll = {
             });
     },
 
+    processBlockQueue: function() {
+        let callback = lazyTroll.blockQueue.pop();
+        if (callback) callback();
+
+        setTimeout(lazyTroll.processBlockQueue, 200);
+
+    },
+
     start: function() {
         console.log('lazyTroll: start');
         lazyTroll.loadConfig();
@@ -219,6 +165,8 @@ lazyTroll = {
                 subtree: true,
                 childList: true,
             });
+
+        setTimeout(lazyTroll.processBlockQueue, 200);
     },
 
     cleanup: function() {
