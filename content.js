@@ -14,13 +14,13 @@ lazyTroll = {
         lazyTroll.blockQueue.push(function () {
             // Make sure this isn't someone who got blocked for something else
             let youBlock = $(node).attr('data-you-block');
-            if (youBlock === 'true') return true;
+            if (youBlock === 'true') return;
 
             // one last check to make sure we're not accidentally
             // triggering a block on the wrong tweet
             if((screenName !== $(node).attr('data-screen-name')) ||
                 (userId !== $(node).attr('data-user-id'))) {
-                return true;
+                return;
             }
 
             console.log('lazyTroll: blockUser ' + screenName + ': ' + reason);
@@ -45,8 +45,6 @@ lazyTroll = {
 
             // Destroy the tweet node in case it didn't get hidden
             node.remove();
-
-            return false;
         });
     },
 
@@ -82,14 +80,14 @@ lazyTroll = {
 
     checkUser: function(node) {
         let userId = $(node).attr('data-user-id');
-        if (!userId) return true;
+        if (!userId) return;
 
         // Don't check profiles that have already been cleared
-        if (lazyTroll.alreadyChecked.includes(userId)) return true;
+        if (lazyTroll.alreadyChecked.includes(userId)) return;
 
         // Don't check anyone you follow or have already blocked
-        if ($(node).attr('data-you-follow') === 'true') return true;
-        if ($(node).attr('data-you-block') === 'true') return true;
+        if ($(node).attr('data-you-follow') === 'true') return;
+        if ($(node).attr('data-you-block') === 'true') return;
 
         let screenName = $(node).attr('data-screen-name');
 
@@ -105,7 +103,8 @@ lazyTroll = {
         }
 
         // Profiles that pass the profile checks
-        if (lazyTroll.checkProfile(node, userId, screenName)){
+        // won't be checked again
+        if (lazyTroll.checkProfile(node, userId, screenName)) {
             lazyTroll.alreadyChecked.push(userId);
         }
     },
