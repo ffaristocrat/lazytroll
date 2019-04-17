@@ -9,20 +9,19 @@ lazyTroll = {
     blockQueue: [],
 
     blockUser: function(node, userId, screenName, reason) {
+        // Make sure this isn't someone who got blocked for something else
+        let youBlock = $(node).attr('data-you-block');
+        if (youBlock === 'true') return;
+
+        // one last check to make sure we're not accidentally
+        // triggering a block on the wrong tweet
+        if((screenName !== $(node).attr('data-screen-name')) ||
+            (userId !== $(node).attr('data-user-id'))) {
+            return;
+        }
+
         // Push a callback function onto the block queue
-
         lazyTroll.blockQueue.push(function () {
-            // Make sure this isn't someone who got blocked for something else
-            let youBlock = $(node).attr('data-you-block');
-            if (youBlock === 'true') return;
-
-            // one last check to make sure we're not accidentally
-            // triggering a block on the wrong tweet
-            if((screenName !== $(node).attr('data-screen-name')) ||
-                (userId !== $(node).attr('data-user-id'))) {
-                return;
-            }
-
             console.log('lazyTroll: blockUser ' + screenName + ': ' + reason);
 
             // Find the block button on the tweet and click it
