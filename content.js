@@ -1,6 +1,6 @@
 lazyTroll = {
-    profileKeywordKillList: [],
-    userNameKeywordKillList: [],
+    profileKeywordList: [],
+    userNameKeywordList: [],
     blockDefaultProfileImage: true,
     blockScreenNameIsNumeric: true,
     blockProfileTextIsNull: false,
@@ -62,9 +62,9 @@ lazyTroll = {
                     lazyTroll.blockUser(node, userId, screenName, 'profile-text-is-null');
                     allClear = false;
                 }
-                else lazyTroll.profileKeywordKillList.forEach(function (killText) {
-                    if (profileText.indexOf(killText) !== -1) {
-                        lazyTroll.blockUser(node, userId, screenName, 'profileText "' + killText + '"');
+                else lazyTroll.profileKeywordList.forEach(function (keyword) {
+                    if (profileText.indexOf(keyword) !== -1) {
+                        lazyTroll.blockUser(node, userId, screenName, 'profileText "' + keyword + '"');
                         allClear = false;
                     }
                 });
@@ -105,7 +105,7 @@ lazyTroll = {
         // User name has prohibited keywords/characters
         let userName = $(node).find('strong.fullname').text().toLowerCase().trim();
         let badUserName = false;
-        lazyTroll.userNameKeywordKillList.forEach(function (keyword) {
+        lazyTroll.userNameKeywordList.forEach(function (keyword) {
             if (userName.indexOf(keyword) !== -1) {
                 lazyTroll.blockUser(node, userId, screenName, 'userName "' + keyword + '"');
                 badUserName = true;
@@ -149,8 +149,8 @@ lazyTroll = {
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
             blockProfileTextIsNull: false,
-            profileKeywordKillList: "",
-            userNameCharacterKillList: ""
+            profileKeywordList: "",
+            userNameKeywordList: ""
         }, function(items) {
             // Fairly straightforward true/false options
             lazyTroll.blockDefaultProfileImage = items.blockDefaultProfileImage;
@@ -159,19 +159,19 @@ lazyTroll = {
 
             // Keywords are forced to lower case and trimmed
             // Empty lines are ignored
-            let profileKeywordKillList = items.profileKeywordKillList.split('\n');
-            let userNameKeywordKillList = items.userNameCharacterKillList.split('\n');
+            let profileKeywordKillList = items.profileKeywordList.split('\n');
+            let userNameKeywordKillList = items.userNameKeywordList.split('\n');
 
             profileKeywordKillList.forEach(function(value) {
                 let keyword = $.trim(value.toLowerCase());
                 if (keyword !== "") {
-                    lazyTroll.profileKeywordKillList.push(keyword);
+                    lazyTroll.profileKeywordList.push(keyword);
                 }
             });
             userNameKeywordKillList.forEach(function(value) {
                 let keyword = $.trim(value.toLowerCase());
                 if (keyword !== "") {
-                    lazyTroll.userNameKeywordKillList.push(keyword);
+                    lazyTroll.userNameKeywordList.push(keyword);
                 }
             });
 

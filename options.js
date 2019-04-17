@@ -4,10 +4,10 @@ lazyTrollOptions = {
             blockDefaultProfileImage: $('#blockDefaultProfileImage').is(':checked'),
             blockScreenNameIsNumeric: $('#blockScreenNameIsNumeric').is(':checked'),
             blockProfileTextIsNull: $('#blockProfileTextIsNull').is(':checked'),
-            profileKeywordKillList: $('#profileKeywordKillList').val(),
-            userNameCharacterKillList: $('#userNameCharacterKillList').val(),
+            profileKeywordList: $('#profileKeywordList').val(),
+            userNameKeywordList: $('#userNameKeywordList').val(),
         }, function () {
-            console.log('lazyTrollOptions: saveOptions call back');
+            console.log('lazyTrollOptions: saveOptions');
         });
     },
 
@@ -16,15 +16,15 @@ lazyTrollOptions = {
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
             blockProfileTextIsNull: false,
-            profileKeywordKillList: "",
-            userNameCharacterKillList: "",
+            profileKeywordList: "",
+            userNameKeywordList: "",
         }, function (items) {
-            console.log('lazyTrollOptions: loadOptions call back');
+            console.log('lazyTrollOptions: loadOptions');
             $('#blockDefaultProfileImage').prop('checked', items.blockDefaultProfileImage);
             $('#blockScreenNameIsNumeric').prop('checked', items.blockScreenNameIsNumeric);
             $('#blockProfileTextIsNull').prop('checked', items.blockProfileTextIsNull);
-            $('#profileKeywordKillList').val(items.profileKeywordKillList);
-            $('#userNameCharacterKillList').val(items.userNameCharacterKillList);
+            $('#profileKeywordList').val(items.profileKeywordList);
+            $('#userNameKeywordList').val(items.userNameKeywordList);
         });
     }
 };
