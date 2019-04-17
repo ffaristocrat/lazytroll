@@ -4,6 +4,7 @@ lazyTroll = {
     blockDefaultProfileImage: true,
     blockScreenNameIsNumeric: true,
     blockProfileTextIsNull: false,
+    minimumFollowers: 0,
 
     alreadyChecked: [],
     blockQueue: [],
@@ -58,6 +59,17 @@ lazyTroll = {
         let url = 'https://twitter.com/i/profiles/popup?user_id=' + userId;
 
         $.getJSON(url, function (data) {
+
+            let followerCount = parseInt($(data['html'])
+                .find('a[data-element-term="follower_stats"]')
+                .find('span.ProfileCardStats-statValue')
+                .attr('data-count'));
+
+            if (followerCount && (followerCount < lazyTroll.minimumFollowers)) {
+                lazyTroll.blockUser(node, userId, screenName, 'minimum-followers');
+                return false;
+            }
+
             let profileText = $(data['html']).find('p.bio').text().toLowerCase().trim();
 
             if (profileText) {
@@ -153,12 +165,14 @@ lazyTroll = {
             blockScreenNameIsNumeric: true,
             blockProfileTextIsNull: false,
             profileKeywordList: "",
-            userNameKeywordList: ""
+            userNameKeywordList: "",
+            minimumFollowers: 0
         }, function(items) {
             // Fairly straightforward true/false options
             lazyTroll.blockDefaultProfileImage = items.blockDefaultProfileImage;
             lazyTroll.blockScreenNameIsNumeric = items.blockScreenNameIsNumeric;
             lazyTroll.blockProfileTextIsNull = items.blockProfileTextIsNull;
+            lazyTroll.minimumFollowers = items.minimumFollowers;
 
             // Keywords are forced to lower case and trimmed
             // Empty lines are ignored

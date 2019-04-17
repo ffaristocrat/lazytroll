@@ -20,17 +20,22 @@
       <input type="checkbox" id="blockProfileTextIsNull">
         blank profile text
     </label></div>
+    <div><label>
+        fewer than
+        <input type="number" id="minimumFollowers" min="0" max="99999">
+        followers
+    </label></div>
     </fieldset>
-    <b>keywords in</b>
-    <fieldset>
-        profile
+    <b>keywords in profile</b>
+    <fieldset><label>
     <textarea style="overflow:auto;" rows="10" cols="40" id="profileKeywordList"></textarea>
-    </fieldset>
+    </label></fieldset>
 
-    <fieldset>
-        user name
+    <b>keywords in user name</b>
+    <fieldset><label>
     <textarea style="overflow:auto;" rows="10" cols="40" id="userNameKeywordList"></textarea>
-    </fieldset>
+    </label></fieldset>
+
     <button id="save" type="submit">Save</button>
     <button class="cancel" type="button">Cancel</button>
 </form>

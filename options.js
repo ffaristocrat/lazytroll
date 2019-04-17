@@ -6,6 +6,7 @@ lazyTrollOptions = {
             blockProfileTextIsNull: $('#blockProfileTextIsNull').is(':checked'),
             profileKeywordList: $('#profileKeywordList').val(),
             userNameKeywordList: $('#userNameKeywordList').val(),
+            minimumFollowers: $('#minimumFollowers').val(),
         }, function () {
             console.log('lazyTrollOptions: saveOptions');
         });
@@ -18,6 +19,7 @@ lazyTrollOptions = {
             blockProfileTextIsNull: false,
             profileKeywordList: "",
             userNameKeywordList: "",
+            minimumFollowers: 0,
         }, function (items) {
             console.log('lazyTrollOptions: loadOptions');
             $('#blockDefaultProfileImage').prop('checked', items.blockDefaultProfileImage);
@@ -25,6 +27,7 @@ lazyTrollOptions = {
             $('#blockProfileTextIsNull').prop('checked', items.blockProfileTextIsNull);
             $('#profileKeywordList').val(items.profileKeywordList);
             $('#userNameKeywordList').val(items.userNameKeywordList);
+            $('#minimumFollowers').val(items.minimumFollowers);
         });
     }
 };
