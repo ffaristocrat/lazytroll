@@ -21,6 +21,9 @@ lazyTroll = {
             return;
         }
 
+        if (lazyTroll.blockQueue.length === 0) {
+            setTimeout(lazyTroll.processBlockQueue, 200);
+        }
         // Push a callback function onto the block queue
         lazyTroll.blockQueue.push(
             lazyTroll.clickBlockUserButton(node, userId, screenName, reason)
@@ -139,7 +142,9 @@ lazyTroll = {
         let callback = lazyTroll.blockQueue.pop();
         if (callback) callback();
 
-        setTimeout(lazyTroll.processBlockQueue, 200);
+        if (lazyTroll.blockQueue.length > 0) {
+            setTimeout(lazyTroll.processBlockQueue, 200);
+        }
     },
 
     processMutations: function(mutations) {
@@ -209,9 +214,6 @@ lazyTroll = {
                 subtree: true,
                 childList: true,
             });
-
-        // Start checking the block queue
-        setTimeout(lazyTroll.processBlockQueue, 200);
     },
 
     cleanup: function() {
