@@ -9,37 +9,38 @@ lazyTroll = {
     alreadyChecked: [],
     blockQueue: [],
 
-    blockUser: function(node, userId, screenName, reason) {
+    blockUser: function(tweet, userId, screenName, reason) {
         // Make sure this isn't someone who got blocked for something else
-        let youBlock = $(node).attr('data-you-block');
+        let youBlock = $(tweet).attr('data-you-block');
         if (youBlock === 'true') return;
 
         // one last check to make sure we're not accidentally
         // triggering a block on the wrong tweet
-        if((screenName !== $(node).attr('data-screen-name')) ||
-            (userId !== $(node).attr('data-user-id'))) {
+        if((screenName !== $(tweet).attr('data-screen-name')) ||
+            (userId !== $(tweet).attr('data-user-id'))) {
             return;
         }
 
+        // Start processing the queue if it's empty
         if (lazyTroll.blockQueue.length === 0) {
             setTimeout(lazyTroll.processBlockQueue, 200);
         }
         // Push a callback function onto the block queue
         lazyTroll.blockQueue.push(
-            lazyTroll.clickBlockUserButton(node, userId, screenName, reason)
+            lazyTroll.clickBlockUserButton(tweet, userId, screenName, reason)
         );
     },
 
-    clickBlockUserButton: function(node, userId, screenName, reason) {
+    clickBlockUserButton: function(tweet, userId, screenName, reason) {
         console.log('lazyTroll: blockUser ' + screenName + ' (' + userId + '): ' + reason);
 
         // Find the block button on the tweet and click it
-        let blockButton = $(node)
+        let blockButton = $(tweet)
             .find('li.block-link')
             .find('button.dropdown-link');
 
         if (!blockButton) {
-            blockButton = $(node)
+            blockButton = $(tweet)
                 .find("li.not-blocked");
         }
         blockButton.click();
@@ -52,24 +53,23 @@ lazyTroll = {
             .click();
 
         // Destroy the tweet node in case it didn't get hidden
-        node.remove();
+        tweet.remove();
     },
 
-    checkProfile: function(node, userId, screenName) {
+    checkProfile: function(tweet, userId, screenName) {
         let allClear = true;
 
         // Lightweight call for the profile text used for the hover
         let url = 'https://twitter.com/i/profiles/popup?user_id=' + userId;
 
         $.getJSON(url, function (data) {
-
             let followerCount = parseInt($(data['html'])
                 .find('a[data-element-term="follower_stats"]')
                 .find('span.ProfileCardStats-statValue')
                 .attr('data-count'));
 
             if (followerCount && (followerCount < lazyTroll.minimumFollowers)) {
-                lazyTroll.blockUser(node, userId, screenName, 'minimum-followers');
+                lazyTroll.blockUser(tweet, userId, screenName, 'minimum-followers');
                 return false;
             }
 
@@ -77,18 +77,18 @@ lazyTroll = {
 
             if (profileText) {
                 if (lazyTroll.blockProfileTextIsNull && profileText === '""') {
-                    lazyTroll.blockUser(node, userId, screenName, 'profile-text-is-null');
+                    lazyTroll.blockUser(tweet, userId, screenName, 'profile-text-is-null');
                     allClear = false;
                 }
                 else lazyTroll.profileKeywordList.forEach(function (keyword) {
                     if (profileText.indexOf(keyword) !== -1) {
-                        lazyTroll.blockUser(node, userId, screenName, 'profileText "' + keyword + '"');
+                        lazyTroll.blockUser(tweet, userId, screenName, 'profileText "' + keyword + '"');
                         allClear = false;
                     }
                 });
             }
             else if (lazyTroll.blockProfileTextIsNull) {
-                lazyTroll.blockUser(node, userId, screenName, 'profile-text-is-null');
+                lazyTroll.blockUser(tweet, userId, screenName, 'profile-text-is-null');
                 allClear = false;
             }
         });
@@ -96,36 +96,36 @@ lazyTroll = {
         return allClear;
     },
 
-    checkUser: function(node) {
-        let userId = $(node).attr('data-user-id');
+    checkUser: function(tweet) {
+        let userId = $(tweet).attr('data-user-id');
         if (!userId) return;
 
         // Don't check profiles that have already been cleared
         if (lazyTroll.alreadyChecked.includes(userId)) return;
 
         // Don't check anyone you follow or have already blocked
-        if ($(node).attr('data-you-follow') === 'true') return;
-        if ($(node).attr('data-you-block') === 'true') return;
+        if ($(tweet).attr('data-you-follow') === 'true') return;
+        if ($(tweet).attr('data-you-block') === 'true') return;
 
-        let screenName = $(node).attr('data-screen-name');
+        let screenName = $(tweet).attr('data-screen-name');
 
         if (lazyTroll.blockScreenNameIsNumeric && $.isNumeric(screenName.slice(-8))) {
-            lazyTroll.blockUser(node, userId, screenName, 'screen-name-is-numeric');
+            lazyTroll.blockUser(tweet, userId, screenName, 'screen-name-is-numeric');
             return;
         }
 
-        let profileImage = $(node).find('img.avatar').attr('src');
+        let profileImage = $(tweet).find('img.avatar').attr('src');
         if (lazyTroll.blockDefaultProfileImage && profileImage.indexOf('default_profile_images') !== -1) {
-            lazyTroll.blockUser(node, userId, screenName, 'default-profile-image');
+            lazyTroll.blockUser(tweet, userId, screenName, 'default-profile-image');
             return;
         }
 
         // User name has prohibited keywords/characters
-        let userName = $(node).find('strong.fullname').text().toLowerCase().trim();
+        let userName = $(tweet).find('strong.fullname').text().toLowerCase().trim();
         let badUserName = false;
         lazyTroll.userNameKeywordList.forEach(function (keyword) {
             if (userName.indexOf(keyword) !== -1) {
-                lazyTroll.blockUser(node, userId, screenName, 'userName "' + keyword + '"');
+                lazyTroll.blockUser(tweet, userId, screenName, 'userName "' + keyword + '"');
                 badUserName = true;
             }
         });
@@ -133,12 +133,14 @@ lazyTroll = {
 
         // Profiles that pass the profile checks
         // won't be checked again
-        if (lazyTroll.checkProfile(node, userId, screenName)) {
+        if (lazyTroll.checkProfile(tweet, userId, screenName)) {
             lazyTroll.alreadyChecked.push(userId);
         }
     },
 
     processBlockQueue: function() {
+        // Space out block actions or else some won't get triggered
+
         let callback = lazyTroll.blockQueue.pop();
         if (callback) callback();
 
