@@ -1,37 +1,78 @@
-# Lazy Troll
-Chrome extension to automatically block lazy Twitter trolls.
+# Lazy Troll Blocker
 
-This blocks accounts with
-* No profile pic
-* 8 digits at the end of their username
-* Any key words (case insensitive) on profileKeywordKillList in their 
-*profile* 
+Twitter is a hell site replete with automated accounts, paid trolls, unpaid trolls, nazis,
+sea lions and everything in between. Sure, you can readily identify the people tweeting in bad
+faith but it's exhausting to manually block so many accounts.
+
+Fortunately, a lot of these assholes are also extremely lazy and don't bother to do the bare
+minimum to establish the even pretense of authenticity. Now you can focus your energy on
+blocking the remainder who put at least a little effort behind their trolling.
+
+Will authentic users get caught in the crossfire? Absolutely. Also, who cares? Come up
+with a real screen name and profile if you want me to take you seriously. We're not animals.
+
+This chrome extension can automatically block accounts with
+* Default profile pictures
+* Screen names ending with 8 digits
+* No profile text
+* Fewer than a certain number of followers
+* Certain keywords in their profile
+* Certain keywords in their user name
+
+All of these can be configured to your taste. Only the first two are enabled by default.
 
 This does *not* block accounts who
-* Simply tweet keywords on profileKeywordKillList
 * You follow
-* You already blocked.
+* Simply tweet keywords
 
-You'll want to review profileKeywordKillList in content.js and edit to your
-tastes before installing and running.
+The extension scans the page for tweets, evaluates the username and profile picture.
+If those are fine, it fetches their profile and looks for the keywords. If a block is warranted,
+it triggers the click events for the block button and the block confirmation dialog. If a user
+is cleared, it'll skip checking them going forward until the page is reloaded.
 
-How to install
-* Clone repo
-* Bring up the Extensions page in Chrome
-* Switch Developer Mode on
-* Load unpacked extension
-* Select the lazytroll directory
+Here's a starter pack of keywords
 
-The extension works by evaluating their username and profile pic. If those
-are fine, it fetches their profile info and looks for the keywords.
+Profile:
 
-Once a user has been identified one way or the other, it'll skip them going
-forward.
+* \#MAGA
+* MAGA!
+* \#2A
+* \#Trump2020
+* \#buildthewall
+* \#americafirst
+* not a russian bot
+* followed by
+* \#LiberalismIsAMentalDisorder
+* Constitutional Originalist
+* Constitutional conservative
+* proud conservative
+* \#TrumpTrain
+* \#DrainTheSwamp
+* \#SecureOurBorders
+* \#ProtectOurCitizens
+* \#IProtectOurCommunity
+* \#ConcealCarryPermit
+* \#NRA Member
+* trump supporter
+* lifetime NRA
+* Shadow banned
+* Shadowbanned
+* \#QAnon
+* \#FollowTheWhiteRabbit
+* \#QArmy
+* \#pizzagate
+* \#pedogate
+* Proud Boy
+* Pro-Free Speech
+* Pro Free Speech
+* gab.ai
+* \#RedPill
+* ΜΟΛΩΝ ΛΑΒΕ
+* \#DemExit
+* \#McCarthyism
+* \#WalkAway
 
-It triggers the block user events on the page rather than sending a 
-POST request which would require a lot of work to get the authentication
-set up. As such, it may identify a troll but the actual block may not
-fire. This happens sometimes when a whole bunch of trolls get identified
-in a thread.
+User Name:
 
-Feel free to fork and/or submit pull requests to improve performance!
+* Deplorable
+* ❌
