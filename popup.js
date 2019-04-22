@@ -19,6 +19,8 @@ lazyTrollOptions = {
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
             blockProfileTextIsNull: false,
+            doNotBlockFollowers: true,
+            doNotBlockVerified: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0,
