@@ -4,6 +4,8 @@ lazyTroll = {
     blockDefaultProfileImage: true,
     blockScreenNameIsNumeric: true,
     blockProfileTextIsNull: false,
+    doNotBlockFollowers: true,
+    doNotBlockVerified: true,
     minimumFollowers: 0,
 
     alreadyChecked: [],
@@ -107,7 +109,15 @@ lazyTroll = {
         if ($(tweet).attr('data-you-follow') === 'true') return;
         if ($(tweet).attr('data-you-block') === 'true') return;
 
-        let screenName = $(tweet).attr('data-screen-name');
+        // Don't block followers (optional)
+        if (lazyTroll.doNotBlockFollowers && ($(tweet).attr('data-follows-you') === 'true')) return;
+
+        let verified = $(tweet).find('span.Icon--verified');
+        if (lazyTroll.doNotBlockVerified && verified) return;
+
+        // Don't block the Queen Bee
+        let screenName = $(tweet).attr('data-screen-name').toLowerCase();
+        if (screenName === 'beyonce') return;
 
         if (lazyTroll.blockScreenNameIsNumeric && $.isNumeric(screenName.slice(-8))) {
             lazyTroll.blockUser(tweet, userId, screenName, 'screen-name-is-numeric');
@@ -155,7 +165,6 @@ lazyTroll = {
                 lazyTroll.checkForTweets(node);
             });
         });
-
     },
 
     checkForTweets: function(node) {
@@ -171,6 +180,8 @@ lazyTroll = {
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
             blockProfileTextIsNull: false,
+            doNotBlockFollowers: true,
+            doNotBlockVerified: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0
@@ -179,6 +190,9 @@ lazyTroll = {
             lazyTroll.blockDefaultProfileImage = items.blockDefaultProfileImage;
             lazyTroll.blockScreenNameIsNumeric = items.blockScreenNameIsNumeric;
             lazyTroll.blockProfileTextIsNull = items.blockProfileTextIsNull;
+            lazyTroll.doNotBlockFollowers = items.doNotBlockFollowers;
+            lazyTroll.doNotBlockVerified = items.doNotBlockVerified;
+
             lazyTroll.minimumFollowers = items.minimumFollowers;
 
             // Keywords are forced to lower case and trimmed
@@ -198,8 +212,6 @@ lazyTroll = {
                     lazyTroll.userNameKeywordList.push(keyword);
                 }
             });
-
-
         });
     },
 

@@ -4,6 +4,8 @@ lazyTrollOptions = {
             blockDefaultProfileImage: $('#blockDefaultProfileImage').is(':checked'),
             blockScreenNameIsNumeric: $('#blockScreenNameIsNumeric').is(':checked'),
             blockProfileTextIsNull: $('#blockProfileTextIsNull').is(':checked'),
+            doNotBlockFollowers: $('#doNotBlockFollowers').is(':checked'),
+            doNotBlockVerified: $('#doNotBlockVerified').is(':checked'),
             profileKeywordList: $('#profileKeywordList').val(),
             userNameKeywordList: $('#userNameKeywordList').val(),
             minimumFollowers: $('#minimumFollowers').val(),
@@ -25,6 +27,8 @@ lazyTrollOptions = {
             $('#blockDefaultProfileImage').prop('checked', items.blockDefaultProfileImage);
             $('#blockScreenNameIsNumeric').prop('checked', items.blockScreenNameIsNumeric);
             $('#blockProfileTextIsNull').prop('checked', items.blockProfileTextIsNull);
+            $('#doNotBlockFollowers').prop('checked', items.doNotBlockFollowers);
+            $('#doNotBlockVerified').prop('checked', items.doNotBlockVerified);
             $('#profileKeywordList').val(items.profileKeywordList);
             $('#userNameKeywordList').val(items.userNameKeywordList);
             $('#minimumFollowers').val(items.minimumFollowers);
