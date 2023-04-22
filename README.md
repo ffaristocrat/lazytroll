@@ -1,43 +1,45 @@
 # Lazy Troll Blocker
 
 Twitter is a blighted hellscape replete with automated accounts, paid trolls, unpaid trolls,
-MRAs, foreign propagandists, domestic propagandists, flat earthers, sea lions,
-feline royalists, 9/11 truthers, anime nazis and everything in between.
-Sure, you can readily identify the trash people tweeting in bad faith but who wants to strain their
-wrist blocking dozens of NEETs three clicks at a time?
+MRAs, Elon Musk fans, foreign propagandists, domestic propagandists, flat earthers, sea lions,
+feline royalists, 9/11 truthers, conservative christians, anime nazis, everything in between and
+all combinations thereof. Sure, you can readily identify the trash people tweeting in bad faith but who wants
+to strain their wrist blocking dozens of NEETs three clicks at a time?
 
 Fortunately, being an asshole often goes hand in hand with being extremely lazy and not bothering to do
-the bare minimum to establish the even pretense of authenticity. Now you can focus your energy
-on blocking the remainder who put at least a little effort so they could call you a dumb
+the bare minimum to establish the even pretense of being a decent human being. Now you can focus your energy
+on blocking the remainder who put a tad bit of effort so they could call you a dumb
 [insert slur here].
 
 There are no fancy machine learning algorithms at work. No neural networks were forced to read the
 chans all day so they could learn to hate humanity and/or correctly identify disinformation
-accounts. This isn't a hammer in search of a nail; it's a shovel bludgeoning every shady social
+accounts. This isn't a hammer in search of a nail; it's a shovel bludgeoning every shitty social
 media account it sees, burying the screen name in the back yard and not bothering to ask
-questions later. Block them all and let @jack sort it out.
+questions later. Block them all and let Musk cry about it.
 
-Will authentic users get caught in the crossfire? Absolutely. Also, who cares? Come up
-with a real screen name and profile *before* you start posting if you want me to take
+Will perfectly fine users get caught in the crossfire? Absolutely. Also, who cares? Come up
+with a real screen name and profile and ditch the blue check *before* you start posting if you want me to take
 you seriously. We're not animals.
 
 This extension can automatically block accounts with
+* Twitter Blue subscriber checkmarks
+* NFT profile pictures
 * Default profile pictures
-* Screen names ending with 8 digits
+* User names ending with 8 digits
 * No profile text
 * Fewer than a certain number of followers
 * Certain keywords in their profile
-* Certain keywords in their user name
+* Certain keywords in their screen name
 
 Unless they are
-* followers
-* verified users
+* your followers
+* organization affiliates
 
-All of these can be configured to your taste. The first two block rules and both exceptions are enabled by default.
+All of these can be configured to your taste. The first four block rules and both exceptions are enabled by default.
 
 It *never* blocks accounts that are 
-* Ones you follow
-* Simply tweeing keywords
+* followed by you
+* simply tweeting any keywords
 * Beyoncé
 
 The extension scans the page for tweets, evaluates the username and profile picture.
@@ -53,6 +55,9 @@ If a user is clean, it'll skip checking them going forward until the page is rel
 Here's a starter pack of keywords
 
 Profile:
+* $TSLA
+* \#Bitcoin
+* gamer
 * \#MAGA
 * \#2A
 * \#Trump2020
@@ -92,3 +97,4 @@ Profile:
 User Name:
 * Deplorable
 * ❌
+* .eth
