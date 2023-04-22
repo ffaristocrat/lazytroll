@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="jquery-3.3.1.min.js"></script>
+    <script src="jquery-3.6.4.min.js"></script>
     <script src="popup.js"></script>
 </head>
 <body>
@@ -25,6 +25,14 @@
         <input type="number" id="minimumFollowers" min="0" max="99999">
         followers
     </label></div>
+    <div><label>
+      <input type="checkbox" id="blockVerifiedBlue">
+        twitter blue subscribers
+    </label></div>
+    <div><label>
+      <input type="checkbox" id="blockNFTProfile">
+        nft profile picture
+    </label></div>
     </fieldset>
     <b>keywords in profile</b>
     <fieldset><label>
@@ -35,6 +43,19 @@
     <fieldset><label>
     <textarea style="overflow:auto;" rows="10" cols="40" id="userNameKeywordList"></textarea>
     </label></fieldset>
+
+
+<b>Do NOT block</b>
+    <fieldset>
+    <div><label>
+      <input type="checkbox" id="doNotBlockFollowers">
+        followers
+    </label></div>
+    <div><label>
+      <input type="checkbox" id="doNotBlockAffiliates">
+        organization affiliates
+    </label></div>
+    </fieldset>
 
     <button id="save" type="submit">Save</button>
     <button class="cancel" type="button">Cancel</button>

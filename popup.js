@@ -4,6 +4,10 @@ lazyTrollOptions = {
             blockDefaultProfileImage: $('#blockDefaultProfileImage').is(':checked'),
             blockScreenNameIsNumeric: $('#blockScreenNameIsNumeric').is(':checked'),
             blockProfileTextIsNull: $('#blockProfileTextIsNull').is(':checked'),
+            blockVerifiedBlue: $('#blockVerifiedBlue').is(':checked'),
+            blockNFTProfile: $('#blockNFTProfile').is(':checked'),
+            doNotBlockFollowers: $('#doNotBlockFollowers').is(':checked'),
+            doNotBlockAffiliates: $('#doNotBlockAffiliates').is(':checked'),
             profileKeywordList: $('#profileKeywordList').val(),
             userNameKeywordList: $('#userNameKeywordList').val(),
             minimumFollowers: $('#minimumFollowers').val(),
@@ -17,6 +21,10 @@ lazyTrollOptions = {
             blockDefaultProfileImage: true,
             blockScreenNameIsNumeric: true,
             blockProfileTextIsNull: false,
+            blockVerifiedBlue: true,
+            blockNFTProfile: true,
+            doNotBlockFollowers: true,
+            doNotBlockAffiliates: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0,
@@ -25,6 +33,10 @@ lazyTrollOptions = {
             $('#blockDefaultProfileImage').prop('checked', items.blockDefaultProfileImage);
             $('#blockScreenNameIsNumeric').prop('checked', items.blockScreenNameIsNumeric);
             $('#blockProfileTextIsNull').prop('checked', items.blockProfileTextIsNull);
+            $('#blockNFTProfile').prop('checked', items.blockNFTProfile);
+            $('#doNotBlockFollowers').prop('checked', items.doNotBlockFollowers);
+            $('#doNotBlockAffiliates').prop('checked', items.doNotBlockAffiliates);
+            $('#blockVerifiedBlue').prop('checked', items.blockVerifiedBlue);
             $('#profileKeywordList').val(items.profileKeywordList);
             $('#userNameKeywordList').val(items.userNameKeywordList);
             $('#minimumFollowers').val(items.minimumFollowers);
