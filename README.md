@@ -25,11 +25,11 @@ This extension can automatically block accounts with
 * Twitter Blue subscriber checkmarks
 * NFT profile pictures
 * Default profile pictures
-* User names ending with 8 digits
+* Screen names ending with 8 digits
 * No profile text
 * Fewer than a certain number of followers
 * Certain keywords in their profile
-* Certain keywords in their screen name
+* Certain keywords in their user name
 
 Unless they are
 * your followers
