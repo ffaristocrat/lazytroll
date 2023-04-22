@@ -7,6 +7,7 @@ lazyTroll = {
     blockVerifiedBlue: true,
     blockNFTProfile: false,
     doNotBlockFollowers: true,
+    doNotBlockOrganizations: true,
     doNotBlockAffiliates: true,
     minimumFollowers: 0,
 
@@ -121,7 +122,7 @@ lazyTroll = {
     },
 
     checkUser: function(tweet) {
-        // extract the node containing the username, screen name and any marks
+        // extract the node containing the user name, screen name and any marks
         let nameNode = $(tweet).find("div[data-testid='User-Name']");
 
         // screen name is the handle in the @ and URL
@@ -135,9 +136,8 @@ lazyTroll = {
             lazyTroll.whiteList.includes(screenName.toLowerCase())
         ) return;
 
-        // Username is the display name
+        // User name is the display name
         let userName = $(nameNode).find("a[role='link'][href^='/']").text().trim();
-        // console.log("userName " + userName);
 
         let defaultProfileImage = $(tweet)
             .find("div[data-testid='Tweet-User-Avatar']")
@@ -151,7 +151,10 @@ lazyTroll = {
         let youBlock = false; // $(tweet).attr("data-you-block") === "true";
         let followsYou = false; // $(tweet).attr("data-follows-you") === "true";
 
-        let verifiedBlue = $(nameNode).find("svg[aria-label='Verified account']").length > 0;
+        // Twitter Blue subscribers & organizations are the only ones with checkmarks now
+        let verifiedBlue = $(nameNode).find("svg[data-testid='icon-verified']").length > 0;
+        // organization logos have color gradients
+        let organization = $(nameNode).find("svg[data-testid='icon-verified']").find("linerGradient").length > 0;
         // affiliate logos are images so if any images are in the name node, it must be one
         let affiliate = $(nameNode).find("img[draggable='false']").length > 0;
 
@@ -159,19 +162,23 @@ lazyTroll = {
 
         let userId = 0;
 
-        console.log("lazyTroll: checkUser " + screenName +
-            " verifiedBlue: " + verifiedBlue +
-            " NFTProfile: " + NFTProfile +
-            // " youFollow: " + youFollow +
-            // " youBlock: " + youBlock +
-            // " followsYou: " + followsYou +
-            " defaultProfileImage: " + defaultProfileImage
-        );
+        // console.log("lazyTroll: checkUser " + screenName +
+        //     " verifiedBlue: " + verifiedBlue +
+        //     " NFTProfile: " + NFTProfile +
+        //     " youFollow: " + youFollow +
+        //     " youBlock: " + youBlock +
+        //     " followsYou: " + followsYou +
+        //     " defaultProfileImage: " + defaultProfileImage
+        // );
 
-        if ((screenName === "Beyonce") || youBlock || youFollow ||
-            (lazyTroll.doNotBlockFollowers && followsYou) ||
-            (lazyTroll.doNotBlockAffiliates && affiliate)) {
-            lazyTroll.alreadyChecked.includes(screenName);
+        if (
+            youBlock
+            || youFollow
+            || (lazyTroll.doNotBlockFollowers && followsYou)
+            || (lazyTroll.doNotBlockOrganizations && organization)
+            || (lazyTroll.doNotBlockAffiliates && affiliate)
+        ) {
+            lazyTroll.alreadyChecked.push(screenName);
             return;
         }
 
@@ -251,6 +258,7 @@ lazyTroll = {
             blockNFTProfile: true,
             doNotBlockFollowers: true,
             doNotBlockAffiliates: true,
+            doNotBlockOrganizations: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0
@@ -263,6 +271,7 @@ lazyTroll = {
             lazyTroll.blockNFTProfile = items.blockNFTProfile;
             lazyTroll.doNotBlockFollowers = items.doNotBlockFollowers;
             lazyTroll.doNotBlockAffiliates = items.doNotBlockAffiliates;
+            lazyTroll.doNotBlockOrganizations = items.doNotBlockOrganizations;
 
             lazyTroll.minimumFollowers = items.minimumFollowers;
 
