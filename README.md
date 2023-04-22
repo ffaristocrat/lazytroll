@@ -26,6 +26,7 @@ This extension can automatically block accounts with
 * NFT profile pictures
 * Default profile pictures
 * Screen names ending with 8 digits
+* Screen names starting with The or Real
 * No profile text
 * Fewer than a certain number of followers
 * Certain keywords in their profile

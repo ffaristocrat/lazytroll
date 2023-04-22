@@ -6,6 +6,7 @@ lazyTroll = {
     blockProfileTextIsNull: false,
     blockVerifiedBlue: true,
     blockNFTProfile: false,
+    blockTheRealScreenName: false,
     doNotBlockFollowers: true,
     doNotBlockOrganizations: true,
     doNotBlockAffiliates: true,
@@ -17,11 +18,11 @@ lazyTroll = {
     whiteList: ["diebotdie", "beyounce"],
 
     blockTimeout: 500,
+    theRealRegex: /^(Real|The)[A-Z]*/,
 
     blockUser: function(tweet, userId, screenName, reason) {
         // Make sure this isn't someone who got blocked for something else
         let youBlock = false; // $(tweet).attr("data-you-block") === "true";
-        console.log("Attempting to block  " + screenName);
 
         // Skip users we've already queued blocks for
         if (youBlock || lazyTroll.blocked.includes(screenName)) return;
@@ -33,7 +34,7 @@ lazyTroll = {
             .find("a[role='link'][href^='/']")
             .attr("href");
         if(tweetScreenName && (screenName.toLowerCase() !== tweetScreenName.slice(1).toLowerCase())) {
-            console.log("wat " + screenName + " vs " + tweetScreenName);
+            console.log("Mismatch between " + screenName + " vs " + tweetScreenName);
             return;
         }
 
@@ -156,9 +157,11 @@ lazyTroll = {
         // organization logos have color gradients
         let organization = $(nameNode).find("svg[data-testid='icon-verified']").find("linerGradient").length > 0;
         // affiliate logos are images so if any images are in the name node, it must be one
-        let affiliate = $(nameNode).find("img[draggable='false']").length > 0;
+        let affiliate = $(nameNode).find("img[draggable='false'][alt=null]").length > 0;
 
         let screenNameEndsWith8Numbers = $.isNumeric(screenName.slice(-8));
+        console.log("lazyTroll.theRealRegex.test(" + screenName + ") = " + lazyTroll.theRealRegex.test(screenName))
+        let theRealScreenName = lazyTroll.theRealRegex.test(screenName);
 
         let userId = 0;
 
@@ -200,6 +203,11 @@ lazyTroll = {
         // Block eggs
         if (lazyTroll.blockDefaultProfileImage && defaultProfileImage) {
             lazyTroll.blockUser(tweet, userId, screenName, "default-profile-image");
+            return;
+        }
+        // Block screen names starting with The or Real
+        if (lazyTroll.blockTheRealScreenName && theRealScreenName) {
+            lazyTroll.blockUser(tweet, userId, screenName, "screen-name-starts-with-the-or-real");
             return;
         }
         // Username has prohibited keywords
@@ -256,6 +264,7 @@ lazyTroll = {
             blockProfileTextIsNull: false,
             blockVerifiedBlue: true,
             blockNFTProfile: true,
+            blockTheRealScreenName: false,
             doNotBlockFollowers: true,
             doNotBlockAffiliates: true,
             doNotBlockOrganizations: true,
@@ -269,6 +278,7 @@ lazyTroll = {
             lazyTroll.blockProfileTextIsNull = items.blockProfileTextIsNull;
             lazyTroll.blockVerifiedBlue = items.blockVerifiedBlue;
             lazyTroll.blockNFTProfile = items.blockNFTProfile;
+            lazyTroll.blockTheRealScreenName = items.blockTheRealScreenName;
             lazyTroll.doNotBlockFollowers = items.doNotBlockFollowers;
             lazyTroll.doNotBlockAffiliates = items.doNotBlockAffiliates;
             lazyTroll.doNotBlockOrganizations = items.doNotBlockOrganizations;
