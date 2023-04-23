@@ -1,4 +1,4 @@
-let verifiedWhitelist = [
+export const verifiedWhitelist = [
     "jack",
     "biz"
-]
+];

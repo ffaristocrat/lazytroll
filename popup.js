@@ -9,7 +9,9 @@ lazyTrollOptions = {
             blockTheRealScreenName: $('#blockTheRealScreenName').is(':checked'),
             doNotBlockFollowers: $('#doNotBlockFollowers').is(':checked'),
             doNotBlockOrganizations: $('#doNotBlockOrganizations').is(':checked'),
+            doNotBlockGovernment: $('#doNotBlockGovernment').is(':checked'),
             doNotBlockAffiliates: $('#doNotBlockAffiliates').is(':checked'),
+            doNotBlockLegacy: $('#doNotBlockLegacy').is(':checked'),
             profileKeywordList: $('#profileKeywordList').val(),
             userNameKeywordList: $('#userNameKeywordList').val(),
             minimumFollowers: $('#minimumFollowers').val(),
@@ -28,7 +30,9 @@ lazyTrollOptions = {
             blockTheRealScreenName: false,
             doNotBlockFollowers: true,
             doNotBlockOrganizations: true,
+            doNotBlockGovernment: true,
             doNotBlockAffiliates: true,
+            doNotBlockLegacy: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0,
@@ -37,12 +41,14 @@ lazyTrollOptions = {
             $('#blockDefaultProfileImage').prop('checked', items.blockDefaultProfileImage);
             $('#blockScreenNameIsNumeric').prop('checked', items.blockScreenNameIsNumeric);
             $('#blockProfileTextIsNull').prop('checked', items.blockProfileTextIsNull);
+            $('#blockVerifiedBlue').prop('checked', items.blockVerifiedBlue);
             $('#blockNFTProfile').prop('checked', items.blockNFTProfile);
             $('#blockTheRealScreenName').prop('checked', items.blockTheRealScreenName);
             $('#doNotBlockFollowers').prop('checked', items.doNotBlockFollowers);
             $('#doNotBlockOrganizations').prop('checked', items.doNotBlockOrganizations);
+            $('#doNotBlockGovernment').prop('checked', items.doNotBlockGovernment);
             $('#doNotBlockAffiliates').prop('checked', items.doNotBlockAffiliates);
-            $('#blockVerifiedBlue').prop('checked', items.blockVerifiedBlue);
+            $('#doNotBlockLegacy').prop('checked', items.doNotBlockLegacy);
             $('#profileKeywordList').val(items.profileKeywordList);
             $('#userNameKeywordList').val(items.userNameKeywordList);
             $('#minimumFollowers').val(items.minimumFollowers);

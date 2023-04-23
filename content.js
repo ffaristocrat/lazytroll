@@ -1,4 +1,6 @@
-lazyTroll = {
+import {verifiedWhitelist} from "./whitelist.js";
+
+let lazyTroll = {
     profileKeywordList: [],
     userNameKeywordList: [],
     blockDefaultProfileImage: true,
@@ -9,7 +11,9 @@ lazyTroll = {
     blockTheRealScreenName: false,
     doNotBlockFollowers: true,
     doNotBlockOrganizations: true,
+    doNotBlockGovernment: true,
     doNotBlockAffiliates: true,
+    doNotBlockLegacy: true,
     minimumFollowers: 0,
 
     alreadyChecked: [],
@@ -124,7 +128,7 @@ lazyTroll = {
 
     checkUser: function(tweet) {
         // extract the node containing the user name, screen name and any marks
-        let nameNode = $(tweet).find("div[data-testid='User-Name']");
+        let nameNode = $(tweet).find("div[data-testid='User-Name']").first();
 
         // screen name is the handle in the @ and URL
         let screenName = $(nameNode).find("a[role='link'][href^='/']").attr("href").slice(1);
@@ -140,12 +144,13 @@ lazyTroll = {
         // User name is the display name
         let userName = $(nameNode).find("a[role='link'][href^='/']").text().trim();
 
-        let defaultProfileImage = $(tweet)
+        let avatar = $(tweet)
             .find("div[data-testid='Tweet-User-Avatar']")
+            .first();
+        let defaultProfileImage = avatar
             .find("img[dragging='true'][src*='default_profile']")
             .length > 0;
-        let NFTProfile = $(tweet)
-            .find("div[data-testid='Tweet-User-Avatar']")
+        let NFTProfile = avatar
             .find("img[dragging='true'][alt='Hexagon profile picture']")
             .length > 0;
         let youFollow = false; // $(tweet).attr("data-you-follow") === "true";
@@ -155,31 +160,47 @@ lazyTroll = {
         // Twitter Blue subscribers & organizations are the only ones with checkmarks now
         let verifiedBlue = $(nameNode).find("svg[data-testid='icon-verified']").length > 0;
         // organization logos have color gradients
-        let organization = $(nameNode).find("svg[data-testid='icon-verified']").find("linerGradient").length > 0;
+        let organization = $(nameNode).find("svg[data-testid='icon-verified']").find("linearGradient").length > 0;
+        // government logos have a grey color fill
+        let government = $(nameNode).find("svg[data-testid='icon-verified']").find("path[fill='#829aab']").length > 0;
         // affiliate logos are images so if any images are in the name node, it must be one
-        let affiliate = $(nameNode).find("img[draggable='false'][alt=null]").length > 0;
+        let images = $(nameNode).find("img[draggable='false']");
+        let affiliate = false;
+        images.each(function(image) {
+            console.log("image.getAttribute(\"src\").indexOf('emoji') = "
+                + image.getAttribute("src").indexOf('emoji'));
+            if (image.getAttribute("src").indexOf('emoji') === -1) affiliate = true;
+        });
+        let legacy = verifiedWhitelist.includes(screenName);
 
         let screenNameEndsWith8Numbers = $.isNumeric(screenName.slice(-8));
-        console.log("lazyTroll.theRealRegex.test(" + screenName + ") = " + lazyTroll.theRealRegex.test(screenName))
         let theRealScreenName = lazyTroll.theRealRegex.test(screenName);
 
         let userId = 0;
 
-        // console.log("lazyTroll: checkUser " + screenName +
-        //     " verifiedBlue: " + verifiedBlue +
-        //     " NFTProfile: " + NFTProfile +
-        //     " youFollow: " + youFollow +
-        //     " youBlock: " + youBlock +
-        //     " followsYou: " + followsYou +
-        //     " defaultProfileImage: " + defaultProfileImage
-        // );
+        console.log("lazyTroll: checkUser " + screenName +
+            ", verifiedBlue: " + verifiedBlue +
+            ", legacy: " + legacy +
+            ", organization: " + organization +
+            ", government: " + government +
+            ", affiliate: " + affiliate +
+            ", NFTProfile: " + NFTProfile +
+            ", screenNameEndsWith8Numbers: " + screenNameEndsWith8Numbers +
+            ", theRealScreenName: " + theRealScreenName +
+            // " youFollow: " + youFollow +
+            // " youBlock: " + youBlock +
+            // " followsYou: " + followsYou +
+            ", defaultProfileImage: " + defaultProfileImage
+        );
 
         if (
             youBlock
             || youFollow
             || (lazyTroll.doNotBlockFollowers && followsYou)
             || (lazyTroll.doNotBlockOrganizations && organization)
+            || (lazyTroll.doNotBlockGovernment && government)
             || (lazyTroll.doNotBlockAffiliates && affiliate)
+            || (lazyTroll.doNotBlockLegacy && legacy)
         ) {
             lazyTroll.alreadyChecked.push(screenName);
             return;
@@ -268,6 +289,8 @@ lazyTroll = {
             doNotBlockFollowers: true,
             doNotBlockAffiliates: true,
             doNotBlockOrganizations: true,
+            doNotBlockGovernment: true,
+            doNotBlockLegacy: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0
@@ -282,6 +305,8 @@ lazyTroll = {
             lazyTroll.doNotBlockFollowers = items.doNotBlockFollowers;
             lazyTroll.doNotBlockAffiliates = items.doNotBlockAffiliates;
             lazyTroll.doNotBlockOrganizations = items.doNotBlockOrganizations;
+            lazyTroll.doNotBlockGovernment = items.doNotBlockGovernment;
+            lazyTroll.doNotBlockLegacy = items.doNotBlockLegacy;
 
             lazyTroll.minimumFollowers = items.minimumFollowers;
 

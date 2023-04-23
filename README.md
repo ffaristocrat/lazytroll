@@ -34,6 +34,8 @@ This extension can automatically block accounts with
 
 Unless they are
 * your followers
+* organizations
+* government
 * organization affiliates
 
 All of these can be configured to your taste. The first four block rules and both exceptions are enabled by default.
