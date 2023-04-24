@@ -8,10 +8,15 @@
     {
       "js": [
         "jquery-3.6.4.min.js",
-        "content.js",
-        "whitelist.js"
+        "content.js"
       ],
-    "matches": ["*://*.twitter.com/*", "*://twitter.com/*"]
+      "matches": ["https://mobile.twitter.com/*", "https://twitter.com/*"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["whitelist.csv"],
+      "matches": ["https://mobile.twitter.com/*", "https://twitter.com/*"]
     }
   ],
   "host_permissions": [
@@ -26,8 +31,13 @@
     "alarms"
   ],
   "action": {
-    "default_icon": "icon128.png",
-    "default_popup": "popup.html"
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "Lazy Troll - Options"
   },
   "icons": {
     "16": "icon16.png",

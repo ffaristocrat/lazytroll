@@ -1,5 +1,3 @@
-import {verifiedWhitelist} from "./whitelist.js";
-
 let lazyTroll = {
     profileKeywordList: [],
     userNameKeywordList: [],
@@ -20,6 +18,7 @@ let lazyTroll = {
     blocked: [],
     blockQueue: [],
     whiteList: ["diebotdie", "beyounce"],
+    verifiedWhiteList: [],
 
     blockTimeout: 500,
     theRealRegex: /^(Real|The)[A-Z]*/,
@@ -163,15 +162,10 @@ let lazyTroll = {
         let organization = $(nameNode).find("svg[data-testid='icon-verified']").find("linearGradient").length > 0;
         // government logos have a grey color fill
         let government = $(nameNode).find("svg[data-testid='icon-verified']").find("path[fill='#829aab']").length > 0;
-        // affiliate logos are images so if any images are in the name node, it must be one
-        let images = $(nameNode).find("img[draggable='false']");
-        let affiliate = false;
-        images.each(function(image) {
-            console.log("image.getAttribute(\"src\").indexOf('emoji') = "
-                + image.getAttribute("src").indexOf('emoji'));
-            if (image.getAttribute("src").indexOf('emoji') === -1) affiliate = true;
-        });
-        let legacy = verifiedWhitelist.includes(screenName);
+        // affiliate logos are images so if any non-emoji images are in the name node, it must be one
+        // TODO: This isn't working correctly on profile pages
+        let affiliate = $(nameNode).find("img[draggable='false']").not("img[src*='emoji']").length > 0;
+        let legacy = lazyTroll.verifiedWhiteList.includes(screenName);
 
         let screenNameEndsWith8Numbers = $.isNumeric(screenName.slice(-8));
         let theRealScreenName = lazyTroll.theRealRegex.test(screenName);
@@ -330,9 +324,24 @@ let lazyTroll = {
         });
     },
 
+    loadWhiteList: function () {
+        let url = chrome.runtime.getURL("whitelist.csv");
+        console.log(url);
+        $.ajax({
+          method: "GET",
+          url: url,
+          dataType: "text",
+            async: false
+        }).done(function (data) {
+             lazyTroll.verifiedWhiteList = data.split(/\r\n|\n/);
+        });
+    },
+
     start: function() {
         console.log("lazyTroll: start");
         lazyTroll.loadConfig();
+
+        if (!lazyTroll.verifiedWhiteList) lazyTroll.loadWhiteList();
 
         // Do a first pass on the existing page
         lazyTroll.checkForTweets(document);
