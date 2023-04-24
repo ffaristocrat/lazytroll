@@ -2,7 +2,7 @@ lazyTrollOptions = {
     saveOptions: function () {
         chrome.storage.local.set({
             blockDefaultProfileImage: $('#blockDefaultProfileImage').is(':checked'),
-            blockScreenNameIsNumeric: $('#blockScreenNameIsNumeric').is(':checked'),
+            blockScreenNameEndsWith8Numbers: $('#blockScreenNameEndsWith8Numbers').is(':checked'),
             blockProfileTextIsNull: $('#blockProfileTextIsNull').is(':checked'),
             blockVerifiedBlue: $('#blockVerifiedBlue').is(':checked'),
             blockNFTProfile: $('#blockNFTProfile').is(':checked'),
@@ -24,7 +24,7 @@ lazyTrollOptions = {
     loadOptions: function() {
         chrome.storage.local.get({
             blockDefaultProfileImage: true,
-            blockScreenNameIsNumeric: true,
+            blockScreenNameEndsWith8Numbers: true,
             blockProfileTextIsNull: false,
             blockVerifiedBlue: true,
             blockNFTProfile: true,
@@ -41,7 +41,7 @@ lazyTrollOptions = {
         }, function (items) {
             console.log('lazyTrollOptions: loadOptions');
             $('#blockDefaultProfileImage').prop('checked', items.blockDefaultProfileImage);
-            $('#blockScreenNameIsNumeric').prop('checked', items.blockScreenNameIsNumeric);
+            $('#blockScreenNameEndsWith8Numbers').prop('checked', items.blockScreenNameEndsWith8Numbers);
             $('#blockProfileTextIsNull').prop('checked', items.blockProfileTextIsNull);
             $('#blockVerifiedBlue').prop('checked', items.blockVerifiedBlue);
             $('#blockNFTProfile').prop('checked', items.blockNFTProfile);
