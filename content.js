@@ -7,6 +7,7 @@ let lazyTroll = {
     blockVerifiedBlue: true,
     blockNFTProfile: false,
     blockTheRealScreenName: false,
+    blockPromoters: false,
     doNotBlockFollowers: true,
     doNotBlockOrganizations: true,
     doNotBlockGovernment: true,
@@ -152,6 +153,9 @@ let lazyTroll = {
         let NFTProfile = avatar
             .find("img[dragging='true'][alt='Hexagon profile picture']")
             .length > 0;
+        let promoter = $(tweet)
+            .find("div[data-testid='promotedIndicator']")
+            .length > 0;
         let youFollow = false; // $(tweet).attr("data-you-follow") === "true";
         let youBlock = false; // $(tweet).attr("data-you-block") === "true";
         let followsYou = false; // $(tweet).attr("data-follows-you") === "true";
@@ -181,6 +185,7 @@ let lazyTroll = {
             ", NFTProfile: " + NFTProfile +
             ", screenNameEndsWith8Numbers: " + screenNameEndsWith8Numbers +
             ", theRealScreenName: " + theRealScreenName +
+            ", promoter: " + promoter +
             // " youFollow: " + youFollow +
             // " youBlock: " + youBlock +
             // " followsYou: " + followsYou +
@@ -223,6 +228,11 @@ let lazyTroll = {
         // Block screen names starting with The or Real
         if (lazyTroll.blockTheRealScreenName && theRealScreenName) {
             lazyTroll.blockUser(tweet, userId, screenName, "screen-name-starts-with-the-or-real");
+            return;
+        }
+        // Block users posting promoted tweets
+        if (lazyTroll.blockPromoters && promoter) {
+            lazyTroll.blockUser(tweet, userId, screenName, "promoted-tweet");
             return;
         }
         // Username has prohibited keywords
@@ -280,6 +290,7 @@ let lazyTroll = {
             blockVerifiedBlue: true,
             blockNFTProfile: true,
             blockTheRealScreenName: false,
+            blockPromoters: false,
             doNotBlockFollowers: true,
             doNotBlockAffiliates: true,
             doNotBlockOrganizations: true,
@@ -296,6 +307,7 @@ let lazyTroll = {
             lazyTroll.blockVerifiedBlue = items.blockVerifiedBlue;
             lazyTroll.blockNFTProfile = items.blockNFTProfile;
             lazyTroll.blockTheRealScreenName = items.blockTheRealScreenName;
+            lazyTroll.blockPromoters = items.blockPromoters;
             lazyTroll.doNotBlockFollowers = items.doNotBlockFollowers;
             lazyTroll.doNotBlockAffiliates = items.doNotBlockAffiliates;
             lazyTroll.doNotBlockOrganizations = items.doNotBlockOrganizations;

@@ -7,6 +7,7 @@ lazyTrollOptions = {
             blockVerifiedBlue: $('#blockVerifiedBlue').is(':checked'),
             blockNFTProfile: $('#blockNFTProfile').is(':checked'),
             blockTheRealScreenName: $('#blockTheRealScreenName').is(':checked'),
+            blockPromoters: $('#blockPromoters').is(':checked'),
             doNotBlockFollowers: $('#doNotBlockFollowers').is(':checked'),
             doNotBlockOrganizations: $('#doNotBlockOrganizations').is(':checked'),
             doNotBlockGovernment: $('#doNotBlockGovernment').is(':checked'),
@@ -28,6 +29,7 @@ lazyTrollOptions = {
             blockVerifiedBlue: true,
             blockNFTProfile: true,
             blockTheRealScreenName: false,
+            blockPromoters: false,
             doNotBlockFollowers: true,
             doNotBlockOrganizations: true,
             doNotBlockGovernment: true,
@@ -44,6 +46,7 @@ lazyTrollOptions = {
             $('#blockVerifiedBlue').prop('checked', items.blockVerifiedBlue);
             $('#blockNFTProfile').prop('checked', items.blockNFTProfile);
             $('#blockTheRealScreenName').prop('checked', items.blockTheRealScreenName);
+            $('#blockPromoters').prop('checked', items.blockPromoters);
             $('#doNotBlockFollowers').prop('checked', items.doNotBlockFollowers);
             $('#doNotBlockOrganizations').prop('checked', items.doNotBlockOrganizations);
             $('#doNotBlockGovernment').prop('checked', items.doNotBlockGovernment);
