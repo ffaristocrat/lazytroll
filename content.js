@@ -161,7 +161,6 @@ let lazyTroll = {
         let followsYou = false; // $(tweet).attr("data-follows-you") === "true";
 
         let verifiedIcon = $(nameNode).find("svg[data-testid='icon-verified']")
-        console.log(verifiedIcon);
         // Twitter Blue subscribers & organizations are the only ones with checkmarks now
         let verifiedBlue = verifiedIcon.length > 0;
         // organization logos have color gradients
@@ -169,7 +168,7 @@ let lazyTroll = {
         // government logos have a grey color fill
         let government = verifiedIcon.first().find("path[fill='#829aab']").length > 0;
         // affiliate logos are any images after the verified icon
-        let affiliate = verifiedIcon.nextSibling !== null;
+        let affiliate = verifiedBlue && (verifiedIcon.parent().first().children().length >= 2);
 
         let legacy = lazyTroll.verifiedWhiteList.includes(screenName);
         let screenNameEndsWith8Numbers = $.isNumeric(screenName.slice(-8));
@@ -192,6 +191,12 @@ let lazyTroll = {
             // " followsYou: " + followsYou +
             ", defaultProfileImage: " + defaultProfileImage
         );
+
+        // Block users posting promoted tweets
+        if (lazyTroll.blockPromoters && promoter) {
+            lazyTroll.blockUser(tweet, userId, screenName, "promoted-tweet");
+            return;
+        }
 
         if (
             youBlock
@@ -231,11 +236,7 @@ let lazyTroll = {
             lazyTroll.blockUser(tweet, userId, screenName, "screen-name-starts-with-the-or-real");
             return;
         }
-        // Block users posting promoted tweets
-        if (lazyTroll.blockPromoters && promoter) {
-            lazyTroll.blockUser(tweet, userId, screenName, "promoted-tweet");
-            return;
-        }
+
         // Username has prohibited keywords
         let badUserNameKeyword = '';
         lazyTroll.userNameKeywordList.forEach(function (keyword) {
