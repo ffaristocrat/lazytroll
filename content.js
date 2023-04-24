@@ -153,9 +153,14 @@ let lazyTroll = {
         let NFTProfile = avatar
             .find("img[dragging='true'][alt='Hexagon profile picture']")
             .length > 0;
-        let promoter = $(tweet)
+        let promoter = (
+            $(tweet)
             .find("div[data-testid='promotedIndicator']")
-            .length > 0;
+            .length > 0
+        ) || (
+            $(tweet)
+            .parent("div[data-testid='placementTracking']").length > 0
+        )
         let youFollow = false; // $(tweet).attr("data-you-follow") === "true";
         let youBlock = false; // $(tweet).attr("data-you-block") === "true";
         let followsYou = false; // $(tweet).attr("data-follows-you") === "true";
