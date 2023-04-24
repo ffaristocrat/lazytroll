@@ -160,17 +160,18 @@ let lazyTroll = {
         let youBlock = false; // $(tweet).attr("data-you-block") === "true";
         let followsYou = false; // $(tweet).attr("data-follows-you") === "true";
 
+        let verifiedIcon = $(nameNode).find("svg[data-testid='icon-verified']")
+        console.log(verifiedIcon);
         // Twitter Blue subscribers & organizations are the only ones with checkmarks now
-        let verifiedBlue = $(nameNode).find("svg[data-testid='icon-verified']").length > 0;
+        let verifiedBlue = verifiedIcon.length > 0;
         // organization logos have color gradients
-        let organization = $(nameNode).find("svg[data-testid='icon-verified']").find("linearGradient").length > 0;
+        let organization = verifiedIcon.first().find("linearGradient").length > 0;
         // government logos have a grey color fill
-        let government = $(nameNode).find("svg[data-testid='icon-verified']").find("path[fill='#829aab']").length > 0;
-        // affiliate logos are images so if any non-emoji images are in the name node, it must be one
-        // TODO: This isn't working correctly on profile pages
-        let affiliate = $(nameNode).find("img[draggable='false']").not("img[src*='emoji']").length > 0;
-        let legacy = lazyTroll.verifiedWhiteList.includes(screenName);
+        let government = verifiedIcon.first().find("path[fill='#829aab']").length > 0;
+        // affiliate logos are any images after the verified icon
+        let affiliate = verifiedIcon.nextSibling !== null;
 
+        let legacy = lazyTroll.verifiedWhiteList.includes(screenName);
         let screenNameEndsWith8Numbers = $.isNumeric(screenName.slice(-8));
         let theRealScreenName = lazyTroll.theRealRegex.test(screenName);
 
