@@ -1,94 +1,163 @@
-lazyTroll = {
+let lazyTroll = {
     profileKeywordList: [],
     userNameKeywordList: [],
     blockDefaultProfileImage: true,
-    blockScreenNameIsNumeric: true,
+    blockScreenNameEndsWith8Numbers: true,
     blockProfileTextIsNull: false,
+    blockVerifiedBlue: true,
+    blockNFTProfile: false,
+    blockTheRealScreenName: false,
+    blockPromoters: false,
+    doNotBlockFollowers: true,
+    doNotBlockOrganizations: true,
+    doNotBlockGovernment: true,
+    doNotBlockAffiliates: true,
+    doNotBlockLegacy: true,
     minimumFollowers: 0,
 
     alreadyChecked: [],
+    blocked: [],
     blockQueue: [],
+    whiteList: ["diebotdie", "beyounce"],
+    verifiedWhiteList: [],
 
-    blockUser: function(node, userId, screenName, reason) {
+    blockTimeout: 500,
+    theRealRegex: /^(Real|The)[A-Z]*/,
+
+    // From https://stackoverflow.com/a/74240138/2230249
+    getReactProps: function (parent, target) {
+      const keyof_ReactProps = Object.keys(parent).find(k => k.startsWith("__reactProps$"));
+      const symof_ReactFragment = Symbol.for("react.fragment");
+
+      // Find the path from target to parent
+      let path = [];
+      let elem = target;
+      while (elem !== parent) {
+          let index = 0;
+          for (let sibling = elem; sibling != null;) {
+              if (sibling[keyof_ReactProps]) index++;
+              sibling = sibling.previousElementSibling;
+          }
+          path.push({ child: elem, index });
+          elem = elem.parentElement;
+      }
+      // Walk down the path to find the React state props
+      let state = elem[keyof_ReactProps];
+      for (let i = path.length - 1; i >= 0 && state != null; i--) {
+          // Find the target child state index
+          let childStateIndex = 0, childElemIndex = 0;
+          while (childStateIndex < state.children.length) {
+              let childState = state.children[childStateIndex];
+              if (childState instanceof Object) {
+                  // Fragment children are inlined in the parent DOM element
+                  let isFragment = childState.type === symof_ReactFragment && childState.props.children.length;
+                  childElemIndex += isFragment ? childState.props.children.length : 1;
+                  if (childElemIndex === path[i].index) break;
+              }
+              childStateIndex++;
+          }
+          let childState = state.children[childStateIndex] ?? (childStateIndex === 0 ? state.children : null);
+          state = childState?.props;
+          elem = path[i].child;
+      }
+      return state;
+    },
+
+    blockUser: function(tweet, userId, screenName, reason) {
         // Make sure this isn't someone who got blocked for something else
-        let youBlock = $(node).attr('data-you-block');
-        if (youBlock === 'true') return;
+        let youBlock = false; // $(tweet).attr("data-you-block") === "true";
 
-        // one last check to make sure we're not accidentally
+        // Skip users we've already queued blocks for
+        if (youBlock || lazyTroll.blocked.includes(screenName)) return;
+
+        // One last check to make sure we're not accidentally
         // triggering a block on the wrong tweet
-        if((screenName !== $(node).attr('data-screen-name')) ||
-            (userId !== $(node).attr('data-user-id'))) {
+        let tweetScreenName = $(tweet)
+            .find("div[data-testid='User-Name']")
+            .find("a[role='link'][href^='/']")
+            .attr("href");
+        if(tweetScreenName && (screenName.toLowerCase() !== tweetScreenName.slice(1).toLowerCase())) {
+            console.log("Mismatch between " + screenName + " vs " + tweetScreenName);
             return;
         }
 
-        if (lazyTroll.blockQueue.length === 0) {
-            setTimeout(lazyTroll.processBlockQueue, 200);
-        }
         // Push a callback function onto the block queue
         lazyTroll.blockQueue.push(
-            lazyTroll.clickBlockUserButton(node, userId, screenName, reason)
+            function () {lazyTroll.clickBlockUserButton(tweet, userId, screenName, reason)}
         );
-    },
 
-    clickBlockUserButton: function(node, userId, screenName, reason) {
-        console.log('lazyTroll: blockUser ' + screenName + ' (' + userId + '): ' + reason);
-
-        // Find the block button on the tweet and click it
-        let blockButton = $(node)
-            .find('li.block-link')
-            .find('button.dropdown-link');
-
-        if (!blockButton) {
-            blockButton = $(node)
-                .find("li.not-blocked");
+        // Start processing the queue if it *was* empty
+        if (lazyTroll.blockQueue.length === 1) {
+            setTimeout(lazyTroll.processBlockQueue, lazyTroll.blockTimeout);
         }
-        blockButton.click();
 
-        // Hide the modal popup and confirm the block
-        $("body").removeClass("modal-enabled");
-        $('div#block-dialog.block-dialog')
-            .hide()
-            .find('button.block-button')
-            .click();
-
-        // Destroy the tweet node in case it didn't get hidden
-        node.remove();
+        lazyTroll.blocked.push(screenName);
     },
 
-    checkProfile: function(node, userId, screenName) {
+    clickBlockUserButton: function(tweet, userId, screenName, reason) {
+        console.log("lazyTroll: blockUser " + screenName + " : " + reason);
+
+        try {
+            // Click the caret to pop up the menu
+            $(tweet)
+                .find("div[data-testid='caret']")
+                .click();
+
+            // Find menu that pops up independent of the tweet and click it
+            $("body")
+                .find("div[role='menu']")
+                .find("div[role='menuitem'][data-testid='block']")
+                .click();
+
+            // Hide the modal popup and confirm the block
+            $("div[role='alertdialog']")
+                .hide()
+                .find("div[data-testid='confirmationSheetConfirm']")
+                .click();
+        }
+        catch {
+            console.log("lazyTroll: Click block button failed");
+        }
+        finally {
+            // Destroy the tweet node in case it didn't get hidden
+            tweet.remove();
+        }
+    },
+
+    checkProfile: function(tweet, userId, screenName) {
         let allClear = true;
 
         // Lightweight call for the profile text used for the hover
         let url = 'https://twitter.com/i/profiles/popup?user_id=' + userId;
 
-        $.getJSON(url, function (data) {
-
-            let followerCount = parseInt($(data['html'])
-                .find('a[data-element-term="follower_stats"]')
-                .find('span.ProfileCardStats-statValue')
-                .attr('data-count'));
+        $.get(url, function (data) {
+            let followerCount = parseInt($(data).find("a[href$='/followers/']").attr("title").replace(",", ""));
 
             if (followerCount && (followerCount < lazyTroll.minimumFollowers)) {
-                lazyTroll.blockUser(node, userId, screenName, 'minimum-followers');
+                lazyTroll.blockUser(tweet, userId, screenName, "minimum-followers");
                 return false;
             }
 
-            let profileText = $(data['html']).find('p.bio').text().toLowerCase().trim();
+            let profileText = $(data)
+                .find("div[dir='auto'][data-testid='UserDescription']")
+                .description
+                .toLowerCase()
+                .trim();
 
             if (profileText) {
-                if (lazyTroll.blockProfileTextIsNull && profileText === '""') {
-                    lazyTroll.blockUser(node, userId, screenName, 'profile-text-is-null');
+                if (lazyTroll.blockProfileTextIsNull && profileText === "''") {
+                    lazyTroll.blockUser(tweet, userId, screenName, "profile-text-is-null");
                     allClear = false;
                 }
                 else lazyTroll.profileKeywordList.forEach(function (keyword) {
                     if (profileText.indexOf(keyword) !== -1) {
-                        lazyTroll.blockUser(node, userId, screenName, 'profileText "' + keyword + '"');
+                        lazyTroll.blockUser(tweet, userId, screenName, 'profileText "' + keyword + '"');
                         allClear = false;
                     }
                 });
             }
             else if (lazyTroll.blockProfileTextIsNull) {
-                lazyTroll.blockUser(node, userId, screenName, 'profile-text-is-null');
+                lazyTroll.blockUser(tweet, userId, screenName, "profile-text-is-null");
                 allClear = false;
             }
         });
@@ -96,54 +165,149 @@ lazyTroll = {
         return allClear;
     },
 
-    checkUser: function(node) {
-        let userId = $(node).attr('data-user-id');
-        if (!userId) return;
+    checkUser: function(tweet) {
+        // extract the node containing the user name, screen name and any marks
+        let nameNode = $(tweet).find("div[data-testid='User-Name']").first();
 
-        // Don't check profiles that have already been cleared
-        if (lazyTroll.alreadyChecked.includes(userId)) return;
+        // screen name is the handle in the @ and URL
+        let screenName = $(nameNode).find("a[role='link'][href^='/']").attr("href").slice(1);
+        if (!screenName) return;
 
-        // Don't check anyone you follow or have already blocked
-        if ($(node).attr('data-you-follow') === 'true') return;
-        if ($(node).attr('data-you-block') === 'true') return;
+        // Don"t check profiles that have already been cleared or marked for blocking
+        if (
+            lazyTroll.alreadyChecked.includes(screenName) ||
+            lazyTroll.blocked.includes(screenName) ||
+            lazyTroll.whiteList.includes(screenName.toLowerCase())
+        ) return;
 
-        let screenName = $(node).attr('data-screen-name');
+        // User name is the display name
+        let userName = $(nameNode).find("a[role='link'][href^='/']").text().trim();
 
-        if (lazyTroll.blockScreenNameIsNumeric && $.isNumeric(screenName.slice(-8))) {
-            lazyTroll.blockUser(node, userId, screenName, 'screen-name-is-numeric');
+        let avatar = $(tweet)
+            .find("div[data-testid='Tweet-User-Avatar']")
+            .first();
+        let defaultProfileImage = avatar
+            .find("img[dragging='true'][src*='default_profile']")
+            .length > 0;
+        let NFTProfile = avatar
+            .find("img[dragging='true'][alt='Hexagon profile picture']")
+            .length > 0;
+        let promoter = (
+            $(tweet)
+            .find("div[data-testid='promotedIndicator']")
+            .length > 0
+        ) || (
+            $(tweet)
+            .parent("div[data-testid='placementTracking']").length > 0
+        )
+        let youFollow = false; // $(tweet).attr("data-you-follow") === "true";
+        let youBlock = false; // $(tweet).attr("data-you-block") === "true";
+        let followsYou = false; // $(tweet).attr("data-follows-you") === "true";
+
+        let verifiedIcon = $(nameNode).find("svg[data-testid='icon-verified']");
+        // Twitter Blue subscribers & organizations are the only ones with checkmarks now
+        let verifiedBlue = verifiedIcon.length > 0;
+        // organization logos have color gradients
+        let organization = verifiedIcon.first().find("linearGradient").length > 0;
+        // government logos have a grey color fill
+        let government = verifiedIcon.first().find("path[fill='#829aab']").length > 0;
+        // affiliate logos are any images after the verified icon
+        let affiliate = verifiedBlue && (verifiedIcon.parent().first().children().length >= 2);
+
+        let legacy = lazyTroll.verifiedWhiteList.includes(screenName);
+        let screenNameEndsWith8Numbers = $.isNumeric(screenName.slice(-8));
+        let theRealScreenName = lazyTroll.theRealRegex.test(screenName);
+
+        let userId = 0;
+
+        console.log("lazyTroll: checkUser " + screenName +
+            ", verifiedBlue: " + verifiedBlue +
+            ", legacy: " + legacy +
+            ", organization: " + organization +
+            ", government: " + government +
+            ", affiliate: " + affiliate +
+            ", NFTProfile: " + NFTProfile +
+            ", screenNameEndsWith8Numbers: " + screenNameEndsWith8Numbers +
+            ", theRealScreenName: " + theRealScreenName +
+            ", promoter: " + promoter +
+            // " youFollow: " + youFollow +
+            // " youBlock: " + youBlock +
+            // " followsYou: " + followsYou +
+            ", defaultProfileImage: " + defaultProfileImage
+        );
+
+        // Block users posting promoted tweets
+        if (lazyTroll.blockPromoters && promoter) {
+            lazyTroll.blockUser(tweet, userId, screenName, "promoted-tweet");
             return;
         }
 
-        let profileImage = $(node).find('img.avatar').attr('src');
-        if (lazyTroll.blockDefaultProfileImage && profileImage.indexOf('default_profile_images') !== -1) {
-            lazyTroll.blockUser(node, userId, screenName, 'default-profile-image');
+        if (
+            youBlock
+            || youFollow
+            || (lazyTroll.doNotBlockFollowers && followsYou)
+            || (lazyTroll.doNotBlockOrganizations && organization)
+            || (lazyTroll.doNotBlockGovernment && government)
+            || (lazyTroll.doNotBlockAffiliates && affiliate)
+            || (lazyTroll.doNotBlockLegacy && legacy)
+        ) {
+            lazyTroll.alreadyChecked.push(screenName);
             return;
         }
 
-        // User name has prohibited keywords/characters
-        let userName = $(node).find('strong.fullname').text().toLowerCase().trim();
-        let badUserName = false;
+        // Block if profile picture is an NFT
+        if (lazyTroll.blockNFTProfile && NFTProfile) {
+            lazyTroll.blockUser(tweet, userId, screenName, "profile-image-is-nft");
+            return;
+        }
+        // Block if Twitter Blue subscriber
+        if (lazyTroll.blockVerifiedBlue && verifiedBlue) {
+            lazyTroll.blockUser(tweet, userId, screenName, "twitter-blue-subscriber");
+            return;
+        }
+        // Block if last 8 characters of screen name are numeric
+        if (lazyTroll.blockScreenNameEndsWith8Numbers && screenNameEndsWith8Numbers) {
+            lazyTroll.blockUser(tweet, userId, screenName, "screen-name-ends-with-8-numbers");
+            return;
+        }
+        // Block eggs
+        if (lazyTroll.blockDefaultProfileImage && defaultProfileImage) {
+            lazyTroll.blockUser(tweet, userId, screenName, "default-profile-image");
+            return;
+        }
+        // Block screen names starting with The or Real
+        if (lazyTroll.blockTheRealScreenName && theRealScreenName) {
+            lazyTroll.blockUser(tweet, userId, screenName, "screen-name-starts-with-the-or-real");
+            return;
+        }
+
+        // Username has prohibited keywords
+        let badUserNameKeyword = '';
         lazyTroll.userNameKeywordList.forEach(function (keyword) {
             if (userName.indexOf(keyword) !== -1) {
-                lazyTroll.blockUser(node, userId, screenName, 'userName "' + keyword + '"');
-                badUserName = true;
+                badUserNameKeyword = keyword;
             }
         });
-        if (badUserName) return;
+        if (badUserNameKeyword !== '') {
+            lazyTroll.blockUser(tweet, userId, screenName, "userName '" + badUserNameKeyword + "'")
+            return;
+        }
 
+        lazyTroll.alreadyChecked.push(screenName);
         // Profiles that pass the profile checks
         // won't be checked again
-        if (lazyTroll.checkProfile(node, userId, screenName)) {
-            lazyTroll.alreadyChecked.push(userId);
-        }
+        // if (lazyTroll.checkProfile(tweet, userId, screenName)) {
+        //     lazyTroll.alreadyChecked.push(screenName);
+        // }
     },
 
     processBlockQueue: function() {
-        let callback = lazyTroll.blockQueue.pop();
+        // Space out block actions or else some won't get triggered
+        let callback = lazyTroll.blockQueue.shift();
         if (callback) callback();
 
         if (lazyTroll.blockQueue.length > 0) {
-            setTimeout(lazyTroll.processBlockQueue, 200);
+            window.setTimeout(lazyTroll.processBlockQueue, lazyTroll.blockTimeout);
         }
     },
 
@@ -153,12 +317,12 @@ lazyTroll = {
                 lazyTroll.checkForTweets(node);
             });
         });
-
     },
 
     checkForTweets: function(node) {
+        if (!node) return;
         $(node)
-            .find('div.tweet')
+            .find("article[data-testid='tweet']")
             .each(function (i, tweet) {
                 lazyTroll.checkUser(tweet);
             });
@@ -167,16 +331,35 @@ lazyTroll = {
     loadConfig: function() {
         chrome.storage.local.get({
             blockDefaultProfileImage: true,
-            blockScreenNameIsNumeric: true,
+            blockScreenNameEndsWith8Numbers: true,
             blockProfileTextIsNull: false,
+            blockVerifiedBlue: true,
+            blockNFTProfile: true,
+            blockTheRealScreenName: false,
+            blockPromoters: false,
+            doNotBlockFollowers: true,
+            doNotBlockAffiliates: true,
+            doNotBlockOrganizations: true,
+            doNotBlockGovernment: true,
+            doNotBlockLegacy: true,
             profileKeywordList: "",
             userNameKeywordList: "",
             minimumFollowers: 0
         }, function(items) {
             // Fairly straightforward true/false options
             lazyTroll.blockDefaultProfileImage = items.blockDefaultProfileImage;
-            lazyTroll.blockScreenNameIsNumeric = items.blockScreenNameIsNumeric;
+            lazyTroll.blockScreenNameEndsWith8Numbers = items.blockScreenNameEndsWith8Numbers;
             lazyTroll.blockProfileTextIsNull = items.blockProfileTextIsNull;
+            lazyTroll.blockVerifiedBlue = items.blockVerifiedBlue;
+            lazyTroll.blockNFTProfile = items.blockNFTProfile;
+            lazyTroll.blockTheRealScreenName = items.blockTheRealScreenName;
+            lazyTroll.blockPromoters = items.blockPromoters;
+            lazyTroll.doNotBlockFollowers = items.doNotBlockFollowers;
+            lazyTroll.doNotBlockAffiliates = items.doNotBlockAffiliates;
+            lazyTroll.doNotBlockOrganizations = items.doNotBlockOrganizations;
+            lazyTroll.doNotBlockGovernment = items.doNotBlockGovernment;
+            lazyTroll.doNotBlockLegacy = items.doNotBlockLegacy;
+
             lazyTroll.minimumFollowers = items.minimumFollowers;
 
             // Keywords are forced to lower case and trimmed
@@ -196,24 +379,38 @@ lazyTroll = {
                     lazyTroll.userNameKeywordList.push(keyword);
                 }
             });
+        });
+    },
 
-
+    loadWhiteList: function () {
+        let url = chrome.runtime.getURL("whitelist.csv");
+        console.log(url);
+        $.ajax({
+          method: "GET",
+          url: url,
+          dataType: "text",
+            async: false
+        }).done(function (data) {
+             lazyTroll.verifiedWhiteList = data.split(/\r\n|\n/);
         });
     },
 
     start: function() {
-        console.log('lazyTroll: start');
+        console.log("lazyTroll: start");
         lazyTroll.loadConfig();
+
+        if (!lazyTroll.verifiedWhiteList) lazyTroll.loadWhiteList();
 
         // Do a first pass on the existing page
         lazyTroll.checkForTweets(document);
 
         // Setup an observer for
-        lazyTroll.observer = new MutationObserver(lazyTroll.processMutations)
-            .observe(document.body, {
-                subtree: true,
-                childList: true,
-            });
+        lazyTroll.observer = new MutationObserver(lazyTroll.processMutations);
+
+        lazyTroll.observer.observe(document.body, {
+            subtree: true,
+            childList: true,
+        });
     },
 
     cleanup: function() {
@@ -226,6 +423,6 @@ $(document).ready(function () {
     lazyTroll.start();
 });
 
-$('body').bind('beforeunload',function(){
+$("body").bind("beforeunload",function(){
     lazyTroll.cleanup();
 });
